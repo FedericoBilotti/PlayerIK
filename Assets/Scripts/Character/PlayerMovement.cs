@@ -43,7 +43,13 @@ namespace Character
             Vector3 positionTarget = _playerInput.InputMovement.x * _cameraTransform.right;
             positionTarget += _playerInput.InputMovement.y * _cameraTransform.forward;
             positionTarget.y = 0;
-
+            
+            // Vector3 p = Vector3.zero; 
+            // if (Physics.Raycast(_myTransform.position, -_myTransform.up * 2f, out RaycastHit hit, 2f, 6))
+            // {
+            //     p = Vector3.ProjectOnPlane(hit.point, hit.normal);
+            // }
+            
             _rigidbody.AddForce(positionTarget.normalized * (_speed * 100f * Time.fixedDeltaTime));
             _rigidbody.MoveRotation(Quaternion.Slerp(_myTransform.rotation, Quaternion.LookRotation(positionTarget), _slerpSmoothness * Time.fixedDeltaTime));
         }
