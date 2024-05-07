@@ -1,4 +1,6 @@
 using UnityEngine;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Character
 {
@@ -6,19 +8,21 @@ namespace Character
     {
         [SerializeField] private bool _enabled = true;
         [SerializeField, Range(0f, 2f)] private float _distance = 1.1f;
+        [SerializeField, Range(0f, 1f)] private float _velocityPelvis = .2f;
         [SerializeField] private LayerMask _groundMask;
+
+        private float _lastPelvisPosY;
+        private float _pelvisOffset;
 
         private PlayerAnimatorController _playerAnimatorController;
 
         private void Awake() => _playerAnimatorController = GetComponentInParent<PlayerAnimatorController>();
 
-        private void FixedUpdate()
-        {
-        }
-
         private void OnAnimatorIK(int layerIndex)
         {
             if (!_enabled) return;
+
+            MovePelvis();
 
             CalculatePositionIK(AvatarIKGoal.RightFoot, "RightFootIK");
             CalculatePositionIK(AvatarIKGoal.LeftFoot, "LeftFootIK");
@@ -31,13 +35,40 @@ namespace Character
 
             var ray = new Ray(_playerAnimatorController.Animator.GetIKPosition(ikGoal) + Vector3.up, Vector3.down);
             if (!Physics.Raycast(ray, out RaycastHit hit, _distance + 1f, _groundMask)) return;
-            Debug.DrawLine(_playerAnimatorController.Animator.GetIKPosition(ikGoal) + Vector3.up, _playerAnimatorController.Animator.GetIKPosition(ikGoal) + Vector3.down * _distance, Color.red);
+            Debug.DrawLine(_playerAnimatorController.Animator.GetIKPosition(ikGoal) + Vector3.up, Vector3.down * _distance, Color.red);
 
             Vector3 footPos = hit.point;
             footPos.y += _distance;
 
             _playerAnimatorController.Animator.SetIKPosition(ikGoal, footPos);
             _playerAnimatorController.Animator.SetIKRotation(ikGoal, Quaternion.FromToRotation(Vector3.up, hit.normal) * transform.rotation);
+        }
+
+        private void MovePelvis()
+        {
+            Vector3 rightFoot = _playerAnimatorController.Animator.GetIKPosition(AvatarIKGoal.RightFoot);
+            Vector3 leftFoot = _playerAnimatorController.Animator.GetIKPosition(AvatarIKGoal.LeftFoot);
+
+            Vector3 bodyPosition = _playerAnimatorController.Animator.bodyPosition;
+
+            if (rightFoot == Vector3.zero || leftFoot == Vector3.zero)
+            {
+                _lastPelvisPosY = bodyPosition.y;
+                return;
+            }
+
+            float rightOffset = rightFoot.y - transform.position.y;
+            float leftOffset = leftFoot.y - transform.position.y;
+
+            float totalOffset = rightOffset < leftOffset ? leftOffset : rightOffset;
+
+            Vector3 pelvisPos = bodyPosition + Vector3.up * totalOffset;
+
+            pelvisPos.y = Mathf.Lerp(_lastPelvisPosY, pelvisPos.y, _velocityPelvis);
+
+            _playerAnimatorController.Animator.bodyPosition = pelvisPos;
+
+            _lastPelvisPosY = bodyPosition.y;
         }
     }
 }
