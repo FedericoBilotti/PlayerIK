@@ -14,9 +14,11 @@ namespace Character
         private float _lastPelvisPosY;
         private float _pelvisOffset;
 
+        private Transform _transform;
         private PlayerAnimatorController _playerAnimatorController;
 
         private void Awake() => _playerAnimatorController = GetComponentInParent<PlayerAnimatorController>();
+        private void Start() => _transform = transform;
 
         private void OnAnimatorIK(int layerIndex)
         {
@@ -41,7 +43,7 @@ namespace Character
             footPos.y += _distance;
 
             _playerAnimatorController.Animator.SetIKPosition(ikGoal, footPos);
-            _playerAnimatorController.Animator.SetIKRotation(ikGoal, Quaternion.FromToRotation(Vector3.up, hit.normal) * transform.rotation);
+            _playerAnimatorController.Animator.SetIKRotation(ikGoal, Quaternion.FromToRotation(Vector3.up, hit.normal) * _transform.rotation);
         }
 
         private void MovePelvis()
@@ -57,8 +59,8 @@ namespace Character
                 return;
             }
 
-            float rightOffset = rightFoot.y - transform.position.y;
-            float leftOffset = leftFoot.y - transform.position.y;
+            float rightOffset = rightFoot.y - _transform.position.y;
+            float leftOffset = leftFoot.y - _transform.position.y;
 
             float totalOffset = rightOffset < leftOffset ? leftOffset : rightOffset;
 
