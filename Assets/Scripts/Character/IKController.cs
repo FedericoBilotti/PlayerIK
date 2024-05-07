@@ -7,11 +7,7 @@ namespace Character
         [SerializeField] private bool _enabled = true;
         [SerializeField, Range(0f, 2f)] private float _distance = 1.1f;
         [SerializeField] private LayerMask _groundMask;
-        
-        [Header("Gizmos")]
-        [SerializeField] private bool _enabledGizmos = true;
-        [SerializeField, Range(0f, 0.5f)] private float _radius = 0.2f; 
-        
+
         private PlayerAnimatorController _playerAnimatorController;
 
         private void Awake() => _playerAnimatorController = GetComponentInParent<PlayerAnimatorController>();
@@ -23,7 +19,7 @@ namespace Character
         private void OnAnimatorIK(int layerIndex)
         {
             if (!_enabled) return;
-            
+
             CalculatePositionIK(AvatarIKGoal.RightFoot, "RightFootIK");
             CalculatePositionIK(AvatarIKGoal.LeftFoot, "LeftFootIK");
         }
@@ -35,13 +31,13 @@ namespace Character
 
             var ray = new Ray(_playerAnimatorController.Animator.GetIKPosition(ikGoal) + Vector3.up, Vector3.down);
             if (!Physics.Raycast(ray, out RaycastHit hit, _distance + 1f, _groundMask)) return;
-            Debug.DrawLine(_playerAnimatorController.Animator.GetIKPosition(ikGoal) + Vector3.up, Vector3.down * _distance, Color.red);
+            Debug.DrawLine(_playerAnimatorController.Animator.GetIKPosition(ikGoal) + Vector3.up, _playerAnimatorController.Animator.GetIKPosition(ikGoal) + Vector3.down * _distance, Color.red);
 
             Vector3 footPos = hit.point;
             footPos.y += _distance;
 
             _playerAnimatorController.Animator.SetIKPosition(ikGoal, footPos);
-            _playerAnimatorController.Animator.SetIKRotation(ikGoal, Quaternion.LookRotation(transform.forward, hit.normal));
+            _playerAnimatorController.Animator.SetIKRotation(ikGoal, Quaternion.FromToRotation(Vector3.up, hit.normal) * transform.rotation);
         }
     }
 }
