@@ -37,7 +37,6 @@ namespace Character
 
             var ray = new Ray(_playerAnimatorController.Animator.GetIKPosition(ikGoal) + Vector3.up, Vector3.down);
             if (!Physics.Raycast(ray, out RaycastHit hit, _distance + 1f, _groundMask)) return;
-            Debug.DrawLine(_playerAnimatorController.Animator.GetIKPosition(ikGoal) + Vector3.up, Vector3.down * _distance, Color.red);
 
             Vector3 footPos = hit.point;
             footPos.y += _distance;
