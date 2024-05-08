@@ -1,24 +1,27 @@
-using System;
 using UnityEngine;
-using UnityEditor;
 
 namespace Character
 {
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerMovement : MonoBehaviour
     {
+        [Header("Settings")]
         [SerializeField] private float _speed = 1f;
         [SerializeField] private float _slerpSmoothness = 10f;
         [SerializeField, Range(0f, 1f)] private float _dampSmoothnessRun = .5f;
         [SerializeField, Range(0f, 1f)] private float _dampSmoothnessIdle = .25f;
 
+        [Header("Ground check")]
+        [SerializeField] private float _distance = 2f;
+        [SerializeField] private LayerMask _groundLayer;
+
         private PlayerAnimatorController _playerAnimatorController;
         private PlayerInput _playerInput;
         private Rigidbody _rigidbody;
         private Transform _cameraTransform;
-        private Transform _myTransform;
 
-        private Vector3 _rootMotion;
+        private Vector3 _velocityRootMotion;
+        private Quaternion _rotationRootMotion;
 
         private void Awake()
         {
@@ -27,7 +30,6 @@ namespace Character
             _rigidbody = GetComponent<Rigidbody>();
 
             _cameraTransform = Camera.main.transform;
-            _myTransform = transform;
         }
 
         private void Update()
@@ -42,29 +44,34 @@ namespace Character
 
         private void OnAnimatorMove()
         {
-            _rootMotion += _playerAnimatorController.Animator.deltaPosition;
+            _velocityRootMotion += _playerAnimatorController.Animator.deltaPosition;
+            _rotationRootMotion = _playerAnimatorController.Animator.deltaRotation;
         }
 
         private void MoveAndRotateCharacter()
         {
             if (_playerInput.InputMovement == Vector2.zero) return;
 
-            Vector3 positionTarget = _playerInput.InputMovement.x * _cameraTransform.right;
-            positionTarget += _playerInput.InputMovement.y * _cameraTransform.forward;
-            positionTarget += _rootMotion;
+            Vector3 positionTarget = _playerInput.InputMovement.x * _cameraTransform.right + _playerInput.InputMovement.y * _cameraTransform.forward;
+            Vector3 rootTarget = _velocityRootMotion + positionTarget;
             positionTarget.y = 0;
+            rootTarget.y = 0;
 
-            //positionTarget = Vector3.ProjectOnPlane(positionTarget, GetGroundNormal());
+            rootTarget = Vector3.ProjectOnPlane(rootTarget, GetGroundNormal());
             
-            _rigidbody.AddForce(positionTarget * (_speed * Time.fixedDeltaTime));
-            //_rigidbody.MoveRotation(Quaternion.Slerp(_myTransform.rotation, Quaternion.LookRotation(positionTarget), _slerpSmoothness * Time.fixedDeltaTime));
+            Quaternion desiredRotation = Quaternion.LookRotation(positionTarget.normalized);
+            Quaternion newRotation = Quaternion.Slerp(transform.rotation, desiredRotation, _slerpSmoothness * Time.fixedDeltaTime);
+            _rigidbody.MoveRotation(newRotation); 
 
-            _rootMotion = Vector3.zero; // Reiniciar la velocidad de la animacion
+            _rigidbody.AddForce(rootTarget.normalized * (_speed * 100f * Time.fixedDeltaTime)); 
+            
+            _velocityRootMotion = Vector3.zero;
+            _rotationRootMotion = Quaternion.identity;
         }
         
         private Vector3 GetGroundNormal()
         {
-            Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 2f, 6);
+            Physics.Raycast(transform.position + Vector3.up, Vector3.down, out RaycastHit hit, _distance, _groundLayer);
             return hit.normal;
         }
 
@@ -87,6 +94,13 @@ namespace Character
 
             _playerAnimatorController.SetFloat("Vertical", 0, _dampSmoothnessIdle, Time.deltaTime);
             _playerAnimatorController.SetFloat("Horizontal", 0, _dampSmoothnessIdle, Time.deltaTime);
+        }
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            var from = transform.position + Vector3.up;
+            Gizmos.DrawLine(from, from + Vector3.down * _distance);
         }
     }
 }
