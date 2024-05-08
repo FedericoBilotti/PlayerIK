@@ -21,7 +21,6 @@ namespace Character
         private Transform _cameraTransform;
 
         private Vector3 _velocityRootMotion;
-        private Quaternion _rotationRootMotion;
 
         private void Awake()
         {
@@ -45,7 +44,6 @@ namespace Character
         private void OnAnimatorMove()
         {
             _velocityRootMotion += _playerAnimatorController.Animator.deltaPosition;
-            _rotationRootMotion = _playerAnimatorController.Animator.deltaRotation;
         }
 
         private void MoveAndRotateCharacter()
@@ -66,7 +64,6 @@ namespace Character
             _rigidbody.AddForce(rootTarget.normalized * (_speed * 100f * Time.fixedDeltaTime)); 
             
             _velocityRootMotion = Vector3.zero;
-            _rotationRootMotion = Quaternion.identity;
         }
         
         private Vector3 GetGroundNormal()
