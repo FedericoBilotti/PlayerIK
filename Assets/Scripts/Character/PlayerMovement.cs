@@ -84,13 +84,13 @@ namespace Character
                 Vector3 input = _playerInput.InputMovement;
                 input.Normalize();
 
-                _playerAnimatorController.SetFloat("Vertical", input.y, _dampSmoothnessRun, Time.deltaTime);
-                _playerAnimatorController.SetFloat("Horizontal", input.x, _dampSmoothnessRun, Time.deltaTime);
+                _playerAnimatorController.SetFloat("Vertical", input.y, 0f, Time.deltaTime);
+                _playerAnimatorController.SetFloat("Horizontal", input.x, 0f, Time.deltaTime);
                 return;
             }
 
-            _playerAnimatorController.SetFloat("Vertical", 0, _dampSmoothnessIdle, Time.deltaTime);
-            _playerAnimatorController.SetFloat("Horizontal", 0, _dampSmoothnessIdle, Time.deltaTime);
+            _playerAnimatorController.SetFloat("Vertical", 0, 0f, Time.deltaTime);
+            _playerAnimatorController.SetFloat("Horizontal", 0, 0f, Time.deltaTime);
         }
 
         private void OnDrawGizmos()
