@@ -4,7 +4,7 @@ namespace Character
 {
     public class PlayerAnimatorController : MonoBehaviour
     {
-        public Animator Animator { get; private set; }
+        [field: SerializeField] public Animator Animator { get; private set; }
 
         private void Awake()
         {
