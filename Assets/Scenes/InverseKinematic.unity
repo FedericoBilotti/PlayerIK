@@ -297,7 +297,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 127280987}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15007763, y: 0.14276004, z: -0.021905523, w: 0.97806776}
+  m_LocalRotation: {x: 0.15007846, y: 0.1427219, z: -0.02189967, w: 0.9780733}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -423,7 +423,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15007763, y: 0.14276004, z: -0.021905523, w: 0.97806776}
+  m_LocalRotation: {x: 0.15007846, y: 0.1427219, z: -0.02189967, w: 0.9780733}
   m_LocalPosition: {x: -0.09, y: 2.091, z: -1.58}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -853,7 +853,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 620574003}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15007763, y: 0.14276004, z: -0.021905523, w: 0.97806776}
+  m_LocalRotation: {x: 0.15007846, y: 0.1427219, z: -0.02189967, w: 0.9780733}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1085,7 +1085,7 @@ GameObject:
   - component: {fileID: 1225695603}
   - component: {fileID: 1225695596}
   - component: {fileID: 1225695599}
-  - component: {fileID: 1225695601}
+  - component: {fileID: 1225695604}
   - component: {fileID: 1225695602}
   - component: {fileID: 1225695600}
   m_Layer: 7
@@ -1174,28 +1174,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &1225695601
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1225695592}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a884e10cc2d5dad45831e3b0ae1381fb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _animatorController: {fileID: 1225695599}
-  _enabled: 1
-  _offsetDistance: 1.5
-  _distance: 0.1
-  _velocityPelvis: 10
-  _groundMask:
-    serializedVersion: 2
-    m_Bits: 375
-  _drawGizmos: 1
-  _color: {r: 1, g: 0, b: 0, a: 1}
 --- !u!143 &1225695602
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1246,6 +1224,32 @@ MonoBehaviour:
   _groundLayer:
     serializedVersion: 2
     m_Bits: 375
+--- !u!114 &1225695604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1225695592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6f198badcfd44d1bfd211fba5a642d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _enabled: 1
+  _heightFromGroundRaycast: 1.14
+  _raycastDownDistance: 1.5
+  _environmentLayer:
+    serializedVersion: 2
+    m_Bits: 375
+  _pelvisOffset: 0
+  _pelvisUpDownSpeed: 68
+  _feetToIkPositionSpeed: 58.5
+  _speedFuturePosition: 28
+  _maxFuturePosition: 0.228
+  _futurePosition: 0.228
+  _rightFootName: RightFootIK
+  _leftFootName: LeftFootIK
 --- !u!1 &1457074080
 GameObject:
   m_ObjectHideFlags: 0
@@ -1892,8 +1896,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2039933050}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.100975975, y: 0.1436769, z: -0.014738579, w: 0.98434937}
-  m_LocalPosition: {x: 0, y: -0.13678205, z: -0.24290287}
+  m_LocalRotation: {x: 0.15007846, y: 0.1427219, z: -0.02189967, w: 0.9780733}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
