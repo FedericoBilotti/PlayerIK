@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Character
@@ -6,7 +5,7 @@ namespace Character
     public class IKController : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private PlayerAnimatorController _playerAnimatorController;
+        [SerializeField] private AnimatorController _animatorController;
 
         [Header("Settings")]
         [SerializeField] private bool _enabled = true;
@@ -26,13 +25,8 @@ namespace Character
 
         private Transform _transform;
 
-        private void Awake() => _playerAnimatorController = GetComponent<PlayerAnimatorController>();
+        private void Awake() => _animatorController = GetComponent<AnimatorController>();
         private void Start() => _transform = transform;
-
-        private void FixedUpdate()
-        {
-            if (!_enabled) return;
-        }
 
         private void OnAnimatorIK(int layerIndex)
         {
@@ -46,10 +40,10 @@ namespace Character
 
         private void CalculatePositionIK(AvatarIKGoal ikGoal, string foot)
         {
-            _playerAnimatorController.Animator.SetIKPositionWeight(ikGoal, _playerAnimatorController.GetFloat(foot));
-            _playerAnimatorController.Animator.SetIKRotationWeight(ikGoal, _playerAnimatorController.GetFloat(foot));
+            _animatorController.Animator.SetIKPositionWeight(ikGoal, _animatorController.GetFloat(foot));
+            _animatorController.Animator.SetIKRotationWeight(ikGoal, _animatorController.GetFloat(foot));
 
-            Vector3 ikPosition = _playerAnimatorController.Animator.GetIKPosition(ikGoal) + Vector3.up;
+            Vector3 ikPosition = _animatorController.Animator.GetIKPosition(ikGoal) + Vector3.up;
             var ray = new Ray(ikPosition, Vector3.down);
 
             if (!Physics.Raycast(ray, out RaycastHit hit, _offsetDistance, _groundMask)) return;
@@ -57,18 +51,18 @@ namespace Character
             Vector3 footPos = hit.point;
             footPos.y += _distance;
 
-            _playerAnimatorController.Animator.SetIKPosition(ikGoal, footPos);
-            _playerAnimatorController.Animator.SetIKRotation(ikGoal, Quaternion.FromToRotation(Vector3.up, hit.normal) * _transform.rotation);
+            _animatorController.Animator.SetIKPosition(ikGoal, footPos);
+            _animatorController.Animator.SetIKRotation(ikGoal, Quaternion.FromToRotation(Vector3.up, hit.normal) * _transform.rotation);
         }
 
         private void MovePelvis()
         {
-            Vector3 rightFoot = _playerAnimatorController.Animator.GetIKPosition(AvatarIKGoal.RightFoot);
-            Vector3 leftFoot = _playerAnimatorController.Animator.GetIKPosition(AvatarIKGoal.LeftFoot);
+            Vector3 rightFoot = _animatorController.Animator.GetIKPosition(AvatarIKGoal.RightFoot);
+            Vector3 leftFoot = _animatorController.Animator.GetIKPosition(AvatarIKGoal.LeftFoot);
 
             if (rightFoot == Vector3.zero || leftFoot == Vector3.zero)
             {
-                _lastPelvisPosY = _playerAnimatorController.Animator.bodyPosition.y;
+                _lastPelvisPosY = _animatorController.Animator.bodyPosition.y;
                 return;
             }
 
@@ -78,13 +72,13 @@ namespace Character
 
             float totalOffset = leftOffset < rightOffset ? leftOffset : rightOffset;
 
-            Vector3 pelvisPos = _playerAnimatorController.Animator.bodyPosition + Vector3.up * totalOffset;
+            Vector3 pelvisPos = _animatorController.Animator.bodyPosition + Vector3.up * totalOffset;
 
             pelvisPos.y = Mathf.Lerp(_lastPelvisPosY, pelvisPos.y, _velocityPelvis * Time.deltaTime);
 
-            _playerAnimatorController.Animator.bodyPosition = pelvisPos;
+            _animatorController.Animator.bodyPosition = pelvisPos;
 
-            _lastPelvisPosY = _playerAnimatorController.Animator.bodyPosition.y;
+            _lastPelvisPosY = _animatorController.Animator.bodyPosition.y;
         }
 
         private void OnDrawGizmos()
@@ -93,8 +87,8 @@ namespace Character
             {
                 Gizmos.color = _color;  
                 
-                Vector3 fromRight = _playerAnimatorController.Animator.GetBoneTransform(HumanBodyBones.RightFoot).position + Vector3.up;
-                Vector3 fromLeft = _playerAnimatorController.Animator.GetBoneTransform(HumanBodyBones.LeftFoot).position + Vector3.up;
+                Vector3 fromRight = _animatorController.Animator.GetBoneTransform(HumanBodyBones.RightFoot).position + Vector3.up;
+                Vector3 fromLeft = _animatorController.Animator.GetBoneTransform(HumanBodyBones.LeftFoot).position + Vector3.up;
                 
                 Gizmos.DrawLine(fromRight, fromRight + Vector3.down * _offsetDistance);
                 Gizmos.DrawLine(fromLeft , fromLeft + Vector3.down * _offsetDistance);

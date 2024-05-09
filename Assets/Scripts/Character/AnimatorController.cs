@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Character
 {
-    public class PlayerAnimatorController : MonoBehaviour
+    public class AnimatorController : MonoBehaviour
     {
         [field: SerializeField] public Animator Animator { get; private set; }
 

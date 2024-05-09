@@ -77,7 +77,9 @@ ModelImporter:
     normalSmoothingSource: 0
   referencedClips:
   - 8a36203750f91c54cb1b6a9a4c010c71
-  - cbfffd858a5d2cb459a14eda3c335924
+  - 8d1714fe4e1213341a290373b07d6667
+  - 61c825036fcd0464d96b277da0975dfe
+  - 0708ef1d12161424f8d0b8fa086db676
   - 10c9726f8a534574a9d2cb306f8615d3
   importAnimation: 1
   humanDescription:

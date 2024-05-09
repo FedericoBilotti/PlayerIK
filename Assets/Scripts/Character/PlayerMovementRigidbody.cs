@@ -16,7 +16,7 @@ namespace Character
         [SerializeField] private float _distance = 1.4f;
         [SerializeField] private LayerMask _slopeLayer;
 
-        private PlayerAnimatorController _playerAnimatorController;
+        private AnimatorController _animatorController;
         private PlayerInput _playerInput;
         private Rigidbody _rigidbody;
         private Transform _cameraTransform;
@@ -25,7 +25,7 @@ namespace Character
 
         private void Awake()
         {
-            _playerAnimatorController = GetComponent<PlayerAnimatorController>();
+            _animatorController = GetComponent<AnimatorController>();
             _playerInput = GetComponent<PlayerInput>();
             _rigidbody = GetComponent<Rigidbody>();
 
@@ -44,7 +44,7 @@ namespace Character
 
         private void OnAnimatorMove()
         {
-            _velocityRootMotion += _playerAnimatorController.Animator.deltaPosition;
+            _velocityRootMotion += _animatorController.Animator.deltaPosition;
         }
 
         private void MoveAndRotateCharacter()
@@ -88,15 +88,15 @@ namespace Character
             input.Normalize();
             if (isMoving)
             {
-                _playerAnimatorController.SetFloat("Vertical", input.y, _dampSmoothnessRun, Time.deltaTime);
-                _playerAnimatorController.SetFloat("Horizontal", input.x, _dampSmoothnessRun, Time.deltaTime);
-                _playerAnimatorController.SetFloat("InputMagnitude", input.magnitude, _dampSmoothnessRun, Time.deltaTime);
+                _animatorController.SetFloat("Vertical", input.y, _dampSmoothnessRun, Time.deltaTime);
+                _animatorController.SetFloat("Horizontal", input.x, _dampSmoothnessRun, Time.deltaTime);
+                _animatorController.SetFloat("InputMagnitude", input.magnitude, _dampSmoothnessRun, Time.deltaTime);
                 return;
             }
 
-            _playerAnimatorController.SetFloat("InputMagnitude", 0, _dampSmoothnessRun, Time.deltaTime);
-            _playerAnimatorController.SetFloat("Vertical", 0, _dampSmoothnessIdle, Time.deltaTime);
-            _playerAnimatorController.SetFloat("Horizontal", 0, _dampSmoothnessIdle, Time.deltaTime);
+            _animatorController.SetFloat("InputMagnitude", 0, _dampSmoothnessRun, Time.deltaTime);
+            _animatorController.SetFloat("Vertical", 0, _dampSmoothnessIdle, Time.deltaTime);
+            _animatorController.SetFloat("Horizontal", 0, _dampSmoothnessIdle, Time.deltaTime);
         }
 
         private void OnDrawGizmos()
