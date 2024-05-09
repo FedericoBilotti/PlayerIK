@@ -3,17 +3,18 @@ using UnityEngine;
 namespace Character
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class PlayerMovement : MonoBehaviour
+    public class PlayerMovementRigidbody : MonoBehaviour
     {
         [Header("Settings")]
-        [SerializeField] private float _speed = 1f;
+        [SerializeField] private float _speed = 10f;
+        [SerializeField] private float _speedDownOnSlope = 10f;
         [SerializeField] private float _slerpSmoothness = 10f;
-        [SerializeField, Range(0f, 1f)] private float _dampSmoothnessRun = .5f;
-        [SerializeField, Range(0f, 1f)] private float _dampSmoothnessIdle = .25f;
+        [SerializeField, Range(0f, 1f)] private float _dampSmoothnessRun = .1f;
+        [SerializeField, Range(0f, 1f)] private float _dampSmoothnessIdle = .1f;
 
         [Header("Ground check")]
-        [SerializeField] private float _distance = 2f;
-        [SerializeField] private LayerMask _groundLayer;
+        [SerializeField] private float _distance = 1.4f;
+        [SerializeField] private LayerMask _slopeLayer;
 
         private PlayerAnimatorController _playerAnimatorController;
         private PlayerInput _playerInput;
@@ -55,21 +56,25 @@ namespace Character
             positionTarget.y = 0;
             rootTarget.y = 0;
 
-            rootTarget = Vector3.ProjectOnPlane(rootTarget, GetGroundNormal());
-            
             Quaternion desiredRotation = Quaternion.LookRotation(positionTarget.normalized);
             Quaternion newRotation = Quaternion.Slerp(transform.rotation, desiredRotation, _slerpSmoothness * Time.fixedDeltaTime);
-            _rigidbody.MoveRotation(newRotation); 
+            _rigidbody.MoveRotation(newRotation);
 
-            _rigidbody.AddForce(rootTarget.normalized * (_speed * 100f * Time.fixedDeltaTime)); 
-            
+            if (OnSlope(out RaycastHit hit))
+            {
+                rootTarget = Vector3.ProjectOnPlane(rootTarget, hit.normal);
+                _rigidbody.AddForce(rootTarget.normalized * (_speedDownOnSlope * 100f * Time.fixedDeltaTime));
+                _velocityRootMotion = Vector3.zero;
+                return;
+            }
+
+            _rigidbody.AddForce(rootTarget.normalized * (_speed * 100f * Time.fixedDeltaTime));
             _velocityRootMotion = Vector3.zero;
         }
-        
-        private Vector3 GetGroundNormal()
+
+        private bool OnSlope(out RaycastHit hit)
         {
-            Physics.Raycast(transform.position + Vector3.up, Vector3.down, out RaycastHit hit, _distance, _groundLayer);
-            return hit.normal;
+            return Physics.Raycast(transform.position + Vector3.up, Vector3.down, out hit, _distance, _slopeLayer);
         }
 
         private void AnimationMovement()
@@ -83,7 +88,6 @@ namespace Character
             input.Normalize();
             if (isMoving)
             {
-
                 _playerAnimatorController.SetFloat("Vertical", input.y, _dampSmoothnessRun, Time.deltaTime);
                 _playerAnimatorController.SetFloat("Horizontal", input.x, _dampSmoothnessRun, Time.deltaTime);
                 _playerAnimatorController.SetFloat("InputMagnitude", input.magnitude, _dampSmoothnessRun, Time.deltaTime);
