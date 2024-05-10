@@ -6,20 +6,26 @@ namespace Character
     {
         [SerializeField] private bool _enabled = true;
 
+        [SerializeField] private float _pelvisOffset;
         [SerializeField, Range(0f, 2f)] private float _heightFromGroundRaycast = 1.14f;
         [SerializeField, Range(0f, 2f)] private float _raycastDownDistance = 1.5f;
-        [SerializeField] private LayerMask _environmentLayer;
-        [SerializeField] private float _pelvisOffset;
         [SerializeField, Range(0f, 100f)] private float _pelvisUpDownSpeed = 0.28f;
         [SerializeField, Range(0f, 100f)] private float _feetToIkPositionSpeed = 0.5f;
-
+        [SerializeField] private LayerMask _environmentLayer;
+        
         [Header("Running")]
         [SerializeField, Range(0f, 100f)] private float _smoothnessFuturePosition = 1f;
+        [SerializeField, Range(0f, 1f)] private float _minFuturePosition;
         [SerializeField, Range(0f, 1f)] private float _maxFuturePosition = 1f;
-        [SerializeField] private float _futurePosition = 1f;
+        private float _futurePosition;
 
+        [Header("Animator Curves Names")]
         [SerializeField] private string _rightFootName = "RightFootIK";
         [SerializeField] private string _leftFootName = "LeftFootIK";
+
+        [Header("References")]
+        [SerializeField] private AnimatorController _animatorController;
+        [SerializeField] private PlayerInput _playerInput;
 
         private Vector3 _rightFootPosition;
         private Vector3 _leftFootPosition;
@@ -31,12 +37,10 @@ namespace Character
         private float _lastRightFootPositionY;
         private float _lastLeftFootPositionY;
 
-        [SerializeField] private AnimatorController _animatorController;
-        [SerializeField] private PlayerInput _playerInput;
-
         private void Awake()
         {
             _animatorController = GetComponent<AnimatorController>();
+            _playerInput = GetComponent<PlayerInput>();
         }
 
         private void FixedUpdate()
@@ -133,7 +137,7 @@ namespace Character
                 return;
             }
 
-            _futurePosition = Mathf.Lerp(_futurePosition, 0f, _smoothnessFuturePosition * Time.deltaTime);
+            _futurePosition = Mathf.Lerp(_futurePosition, _minFuturePosition, _smoothnessFuturePosition * Time.deltaTime);
         }
 
         private void AdjustFeetTarget(ref Vector3 feetPositions, HumanBodyBones foot)
