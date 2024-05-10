@@ -1,4 +1,7 @@
+using System.Numerics;
 using UnityEngine;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Character
 {
@@ -11,34 +14,31 @@ namespace Character
 
         [Header("Velocity")]
         [SerializeField] private float _speed = 10f;
-
         [SerializeField, Range(0f, 1f)] private float _dampSmoothness = .1f;
 
         [Header("Rotations")]
         [SerializeField, Range(0f, 1f)] private float _allowRotation = 0.3f;
-
         [SerializeField] private float _smoothnessRotation = 10f;
         private float _actualSpeed;
 
-        [Header("Slope")]
-        [SerializeField] private float _jump = 0.2f;
-        [SerializeField, Range(0.01f, 1f)] private float _distanceUp = 0.17f;
-        [SerializeField, Range(0.01f, 1f)] private float _distanceForward = 0.4f;
-        [SerializeField] private float _distanceToDownInSlopeForward = .7f;
-        [SerializeField, Range(0.01f, 0.2f)] private float _lineDistance;
-        [SerializeField, Range(1, 30)] private int _totalRays;
+        [Header("Wall Check")]
+        [SerializeField, Range(1, 30)] private int _totalRays = 8;
+        [SerializeField, Range(0.1f, 4f)] private float _wallDistanceForward = .25f;
+        [SerializeField, Range(0.01f, 1f)] private float _lineDistance = 0.05f;
+        [SerializeField] private LayerMask _wallForwardLayer;
+        private RaycastHit[] _wallHits;
+
+        [Header("Slope Check")]
         [SerializeField] private float _slopeDistanceDown = 1.4f;
-        [SerializeField] private float _slopeDistanceForward = 1.4f;
         [SerializeField] private float _speedOnSlope = 10f;
+        [SerializeField] private float _downSpeedOnSlope = 5f;
         [SerializeField] private float _slopeAngleLimit = 85f;
         [SerializeField] private LayerMask _slopeDownLayer;
-        [SerializeField] private LayerMask _slopeForwardLayer;
-        private Vector3[] _rayPositions;
-        private RaycastHit[] _forwardHit;
-        private RaycastHit _downHit;
-        private bool _onSlope;
+        private RaycastHit _slopeHit;
 
         [Header("Ground check")]
+        [SerializeField] private float _distanceToGround = 0.5f;
+
         [SerializeField] private LayerMask _groundLayer;
 
         private AnimatorController _animatorController;
@@ -47,38 +47,41 @@ namespace Character
         private Transform _cameraTransform;
         private Transform _myTransform;
 
+        private bool _wallForward;
+        private bool _onGround;
+        private bool _onSlope;
         private Vector3 _velocityRootMotion;
 
         private void Awake()
         {
-            _rayPositions = new Vector3[_totalRays];
-            _forwardHit = new RaycastHit[_totalRays];
             _animatorController = GetComponent<AnimatorController>();
             _playerInput = GetComponent<PlayerInput>();
 
             _cameraTransform = Camera.main.transform;
             _myTransform = transform;
 
-            ConfigurateRigidbody();
+            _rigidbody = GetComponent<Rigidbody>();
+            _rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+            _rigidbody.drag = 5;
         }
 
         private void Update()
         {
+            _rigidbody.drag = _onGround ? 5 : 0;
+
             ApplyAnimationValues();
         }
 
         public void FixedUpdate()
         {
-            _onSlope = OnSlope();
-            MoveToSlopeForward();
-            MoveAndRotateCharacter(Time.fixedDeltaTime);
-        }
+            foreach (bool predicate in IsWallForward(out int index))
+            {
+                _wallForward = predicate;
+            }
 
-        private void ConfigurateRigidbody()
-        {
-            _rigidbody = GetComponent<Rigidbody>();
-            _rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
-            _rigidbody.drag = 5;
+            _onGround = OnGround();
+            _onSlope = OnSlope();
+            MoveAndRotateCharacter(Time.fixedDeltaTime);
         }
 
         private void OnAnimatorMove()
@@ -102,12 +105,17 @@ namespace Character
 
             if (_onSlope)
             {
-                rootTarget = Vector3.ProjectOnPlane(rootTarget, _downHit.normal);
-                _rigidbody.AddForce(rootTarget.normalized * (_speedOnSlope * 100f * fixedDelta), ForceMode.Acceleration);
+                Vector3 direction = Vector3.ProjectOnPlane(rootTarget, _slopeHit.normal);
+                _rigidbody.AddForce(direction.normalized * (_speedOnSlope * 100f * fixedDelta), ForceMode.Force);
+
+                if (_rigidbody.velocity.y > 0)
+                {
+                    _rigidbody.AddForce(Vector3.down * (_downSpeedOnSlope * 100f * fixedDelta), ForceMode.Force);
+                }
             }
             else
             {
-                _rigidbody.AddForce(rootTarget.normalized * (_speed * 100f * fixedDelta), ForceMode.Acceleration);
+                _rigidbody.AddForce(rootTarget.normalized * (_speed * 100f * fixedDelta), ForceMode.Force);
             }
 
             _velocityRootMotion = Vector3.zero;
@@ -127,61 +135,53 @@ namespace Character
             _rigidbody.rotation = newRotation;
         }
 
-        private void MoveToSlopeForward()
-        {
-            if (_playerInput.InputMovement.sqrMagnitude <= 0f) return;
-            if (_onSlope)
-            {
-                return;
-            }
-
-            foreach (var predicate in IsSlopeForward(out int index))
-            {
-                if (!predicate)
-                {
-                    continue;
-                }
-
-                Vector3 origin = _forwardHit[index].point + Vector3.up * _distanceUp + _myTransform.forward * _distanceForward;
-                bool desiredPosition = Physics.Raycast(origin, Vector3.down, out RaycastHit hit, _distanceToDownInSlopeForward, _slopeDownLayer);
-
-                if (!desiredPosition)
-                {
-                    Debug.DrawRay(origin, Vector3.down * _distanceToDownInSlopeForward, Color.red);
-                    continue;
-                }
-                
-                Debug.DrawRay(origin, Vector3.down * _distanceToDownInSlopeForward, Color.green);
-                _rigidbody.velocity = Vector3.up * _jump;
-            }
-        }
-
-        private bool[] IsSlopeForward(out int index)
+        private bool[] IsWallForward(out int index)
         {
             bool[] result = new bool[_totalRays];
-            _forwardHit = new RaycastHit[_totalRays];
+            _wallHits = new RaycastHit[_totalRays];
 
-            Vector3 from = _myTransform.position + Vector3.up * _playerHeight;
-            Vector3 rightDirection = _myTransform.right;
-            Vector3 startRayPosition = from - rightDirection * (_lineDistance * (_totalRays - 1) / 2f);
+            Vector3 from = _myTransform.position + Vector3.up;
+            Vector3 upDirection = _myTransform.up;
+            Vector3 startRayPosition = from + Vector3.up - upDirection * (_lineDistance * (_totalRays - 1) / 2f);
             index = 0;
 
             for (int i = 0; i < _totalRays; i++)
             {
-                Vector3 origin = startRayPosition + rightDirection * (_lineDistance * i);
-                result[i] = Physics.Raycast(origin, _myTransform.forward, out var hit, _slopeDistanceForward, _slopeForwardLayer);
-                _rayPositions[i] = origin;
-                _forwardHit[i] = hit;
+                Vector3 origin = startRayPosition + upDirection * (_lineDistance * i);
+                result[i] = Physics.Raycast(origin, _myTransform.forward, out RaycastHit hit, _wallDistanceForward, _wallForwardLayer);
+                _wallHits[i] = hit;
                 index = i;
             }
 
             return result;
         }
 
+        private bool OnGround()
+        {
+            Vector3 from = _myTransform.position + Vector3.up * _playerHeight;
+            return Physics.Raycast(from, Vector3.down, out _slopeHit, _distanceToGround, _groundLayer);
+        }
+
         private bool OnSlope()
         {
             Vector3 from = _myTransform.position + Vector3.up * _playerHeight;
-            return Physics.Raycast(from, Vector3.down, out _downHit, _slopeDistanceDown, _slopeDownLayer);
+            
+            if (Physics.Raycast(from, Vector3.down, out _slopeHit, _slopeDistanceDown, _slopeDownLayer))
+            {
+                Vector3 targetDir =  _slopeHit.point - from;
+                Debug.DrawRay(targetDir, Vector3.down * _slopeDistanceDown, Color.grey);
+                float angle = Vector3.Angle(targetDir, Vector3.down * _slopeDistanceDown);
+                if (angle < _slopeAngleLimit)
+                {
+                    Debug.Log("Pa dentro");
+                    return true;
+                }
+
+                Debug.Log("Fuira");
+                _rigidbody.AddForce(-_slopeHit.transform.forward * (7f * 100f * Time.fixedDeltaTime), ForceMode.Force);
+            }
+
+            return false;
         }
 
         private void ApplyAnimationValues()
@@ -206,14 +206,18 @@ namespace Character
             Vector3 from = position + Vector3.up * _playerHeight;
             Gizmos.DrawRay(from, Vector3.down * _slopeDistanceDown);
 
-            Gizmos.color = Color.green;
-            Vector3 rightDirection = tr.right;
-            Vector3 startRayPosition = from - rightDirection * (_lineDistance * (_totalRays - 1) / 2f);
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawRay(from, Vector3.down * _distanceToGround);
+
+            Gizmos.color = Color.blue;
+
+            Vector3 upDirection = tr.up;
+            Vector3 startRayPosition = position + Vector3.up - upDirection * (_lineDistance * (_totalRays - 1) / 2f);
 
             for (int i = 0; i < _totalRays; i++)
             {
-                Vector3 from2 = startRayPosition + rightDirection * (_lineDistance * i);
-                Gizmos.DrawRay(from2, tr.forward * _slopeDistanceForward);
+                Vector3 from2 = startRayPosition + upDirection * (_lineDistance * i);
+                Gizmos.DrawRay(from2, tr.forward * _wallDistanceForward);
             }
         }
 
