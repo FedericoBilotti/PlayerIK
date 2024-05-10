@@ -168,16 +168,13 @@ namespace Character
             
             if (Physics.Raycast(from, Vector3.down, out _slopeHit, _slopeDistanceDown, _slopeDownLayer))
             {
-                Vector3 targetDir =  _slopeHit.point - from;
-                Debug.DrawRay(targetDir, Vector3.down * _slopeDistanceDown, Color.grey);
-                float angle = Vector3.Angle(targetDir, Vector3.down * _slopeDistanceDown);
-                if (angle < _slopeAngleLimit)
+                float angle = Vector3.Angle(Vector3.up, _slopeHit.normal);
+                
+                if (angle < _slopeAngleLimit && angle != 0)
                 {
-                    Debug.Log("Pa dentro");
                     return true;
                 }
-
-                Debug.Log("Fuira");
+                
                 _rigidbody.AddForce(-_slopeHit.transform.forward * (7f * 100f * Time.fixedDeltaTime), ForceMode.Force);
             }
 
