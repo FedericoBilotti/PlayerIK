@@ -14,7 +14,7 @@ namespace Character
         [SerializeField, Range(0f, 100f)] private float _feetToIkPositionSpeed = 0.5f;
 
         [Header("Running")]
-        [SerializeField, Range(0f, 100f)] private float _speedFuturePosition = 1f;
+        [SerializeField, Range(0f, 100f)] private float _smoothnessFuturePosition = 1f;
         [SerializeField, Range(0f, 1f)] private float _maxFuturePosition = 1f;
         [SerializeField] private float _futurePosition = 1f;
 
@@ -31,7 +31,8 @@ namespace Character
         private float _lastRightFootPositionY;
         private float _lastLeftFootPositionY;
 
-        private AnimatorController _animatorController;
+        [SerializeField] private AnimatorController _animatorController;
+        [SerializeField] private PlayerInput _playerInput;
 
         private void Awake()
         {
@@ -60,16 +61,16 @@ namespace Character
             MoveToIkPoint(AvatarIKGoal.LeftFoot, _leftFootIKPosition, _leftFootIKRotation, ref _lastLeftFootPositionY);
         }
 
-        private void MoveToIkPoint(AvatarIKGoal foot, Vector3 positionIKHolder, Quaternion rotationIKHolder, ref float lastFootPositionY)
+        private void MoveToIkPoint(AvatarIKGoal foot, Vector3 footPosition, Quaternion rotationIKHolder, ref float lastFootPositionY)
         {
             Vector3 targetIKPosition = _animatorController.Animator.GetIKPosition(foot);
 
-            if (positionIKHolder != Vector3.zero)
+            if (footPosition != Vector3.zero)
             {
                 targetIKPosition = transform.InverseTransformPoint(targetIKPosition);
-                positionIKHolder = transform.InverseTransformPoint(positionIKHolder);
+                footPosition = transform.InverseTransformPoint(footPosition);
 
-                float yVariable = Mathf.Lerp(lastFootPositionY, positionIKHolder.y, _feetToIkPositionSpeed);
+                float yVariable = Mathf.Lerp(lastFootPositionY, footPosition.y, _feetToIkPositionSpeed);
                 targetIKPosition.y += yVariable;
 
                 lastFootPositionY = yVariable;
@@ -105,23 +106,34 @@ namespace Character
             _lastPelvisPositionY = _animatorController.Animator.bodyPosition.y;
         }
 
-        private void FeetPositionSolver(Vector3 footPosition, ref Vector3 feetIKPosition, ref Quaternion feetIKRotation)
+        private void FeetPositionSolver(Vector3 footPosition, ref Vector3 footIKPosition, ref Quaternion feetIKRotation)
         {
-            _futurePosition = Mathf.Lerp(_futurePosition, _maxFuturePosition, _speedFuturePosition * Time.deltaTime); // Chequear si estoy quieto o corriendo. Depende qué hago X o Y cosa
+            FuturePositionHandler();
             Vector3 origin = footPosition + transform.forward * _futurePosition;
             Vector3 direction = Vector3.down;
             float distance = _raycastDownDistance * _heightFromGroundRaycast;
 
             if (Physics.Raycast(origin, direction, out RaycastHit hit, distance, _environmentLayer))
             {
-                feetIKPosition = footPosition;
-                feetIKPosition.y = hit.point.y + _pelvisOffset;
+                footIKPosition = footPosition;
+                footIKPosition.y = hit.point.y + _pelvisOffset;
                 feetIKRotation = Quaternion.FromToRotation(Vector3.up, hit.normal) * transform.rotation;
 
                 return;
             }
 
-            feetIKPosition = Vector3.zero;
+            footIKPosition = Vector3.zero;
+        }
+
+        private void FuturePositionHandler()
+        {
+            if (_playerInput.InputMovement.sqrMagnitude > 0)
+            {
+                _futurePosition = Mathf.Lerp(_futurePosition, _maxFuturePosition, _smoothnessFuturePosition * Time.deltaTime);
+                return;
+            }
+
+            _futurePosition = Mathf.Lerp(_futurePosition, 0f, _smoothnessFuturePosition * Time.deltaTime);
         }
 
         private void AdjustFeetTarget(ref Vector3 feetPositions, HumanBodyBones foot)
@@ -144,10 +156,12 @@ namespace Character
             Gizmos.color = Color.yellow;
 
             Vector3 forward = transform.forward;
-            Vector3 originRightFoot = _rightFootPosition + forward * _futurePosition;
-            Vector3 originLeftFoot = _leftFootPosition + forward * _futurePosition;
-            Gizmos.DrawLine(originRightFoot, originRightFoot + Vector3.down * (_raycastDownDistance * _heightFromGroundRaycast));
-            Gizmos.DrawLine(originLeftFoot, originLeftFoot + Vector3.down * (_raycastDownDistance * _heightFromGroundRaycast));
+            Vector3 rightFoot = _animatorController.Animator.GetBoneTransform(HumanBodyBones.RightFoot).position;
+            Vector3 leftFoot = _animatorController.Animator.GetBoneTransform(HumanBodyBones.LeftFoot).position;
+            Vector3 originRightFoot = rightFoot + forward * _futurePosition;
+            Vector3 originLeftFoot = leftFoot + forward * _futurePosition;
+            Gizmos.DrawRay(originRightFoot, Vector3.down * (_raycastDownDistance * _heightFromGroundRaycast));
+            Gizmos.DrawRay(originLeftFoot, Vector3.down * (_raycastDownDistance * _heightFromGroundRaycast));
         }
     }
 }

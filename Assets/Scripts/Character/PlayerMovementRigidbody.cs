@@ -1,3 +1,4 @@
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 namespace Character
@@ -7,14 +8,18 @@ namespace Character
     {
         [Header("Settings")]
         [SerializeField] private float _speed = 10f;
-        [SerializeField] private float _speedDownOnSlope = 10f;
         [SerializeField] private float _slerpSmoothness = 10f;
         [SerializeField, Range(0f, 1f)] private float _dampSmoothnessRun = .1f;
         [SerializeField, Range(0f, 1f)] private float _dampSmoothnessIdle = .1f;
+        
+        [Header("Slope")]
+        [SerializeField] private float _speedOnSlope = 10f;
+        [SerializeField] private float _slopeAngleLimit = 85f;
+        [SerializeField] private LayerMask _slopeLayer;
 
         [Header("Ground check")]
         [SerializeField] private float _distance = 1.4f;
-        [SerializeField] private LayerMask _slopeLayer;
+        [SerializeField] private LayerMask _groundLayer;
 
         private AnimatorController _animatorController;
         private PlayerInput _playerInput;
@@ -51,25 +56,40 @@ namespace Character
         {
             if (_playerInput.InputMovement == Vector2.zero) return;
 
-            Vector3 positionTarget = _playerInput.InputMovement.x * _cameraTransform.right + _playerInput.InputMovement.y * _cameraTransform.forward;
+            Vector3 cameraForward = NormalizeVector3(_cameraTransform.forward);
+            Vector3 cameraRight = NormalizeVector3(_cameraTransform.right);
+
+            Vector3 positionTarget = _playerInput.InputMovement.x * cameraRight + _playerInput.InputMovement.y * cameraForward;
             Vector3 rootTarget = _velocityRootMotion + positionTarget;
             positionTarget.y = 0;
             rootTarget.y = 0;
 
-            Quaternion desiredRotation = Quaternion.LookRotation(positionTarget.normalized);
-            Quaternion newRotation = Quaternion.Slerp(transform.rotation, desiredRotation, _slerpSmoothness * Time.fixedDeltaTime);
-            _rigidbody.MoveRotation(newRotation);
+            Rotation(positionTarget);
 
             if (OnSlope(out RaycastHit hit))
             {
                 rootTarget = Vector3.ProjectOnPlane(rootTarget, hit.normal);
-                _rigidbody.AddForce(rootTarget.normalized * (_speedDownOnSlope * 100f * Time.fixedDeltaTime));
+                _rigidbody.AddForce(rootTarget.normalized * (_speedOnSlope * 100f * Time.fixedDeltaTime));
                 _velocityRootMotion = Vector3.zero;
                 return;
             }
 
             _rigidbody.AddForce(rootTarget.normalized * (_speed * 100f * Time.fixedDeltaTime));
             _velocityRootMotion = Vector3.zero;
+        }
+
+        private Vector3 NormalizeVector3(Vector3 vector)
+        {
+            Vector3 newVector = vector;
+            newVector.y = 0;
+            return newVector.normalized;
+        }
+
+        private void Rotation(Vector3 positionTarget)
+        {
+            Quaternion desiredRotation = Quaternion.LookRotation(positionTarget.normalized);
+            Quaternion newRotation = Quaternion.Slerp(transform.rotation, desiredRotation, _slerpSmoothness * Time.fixedDeltaTime);
+            _rigidbody.MoveRotation(newRotation);
         }
 
         private bool OnSlope(out RaycastHit hit)

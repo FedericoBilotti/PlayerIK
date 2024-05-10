@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Character
@@ -6,16 +5,17 @@ namespace Character
     [RequireComponent(typeof(CharacterController))]
     public class PlayerMovementCharacterController : MonoBehaviour
     {
+        [SerializeField] private bool _isGrounded;
         [SerializeField] private float _characterHeight = 2f;
         [SerializeField] private float _dampTime = 0.2f;
-        [SerializeField] private Vector3 _desiredMoveDirection;
-        [SerializeField] private bool _isGrounded;
+        [SerializeField] private float _gravity = 20f;
         [SerializeField] private float _desiredRotationSpeed;
-        [SerializeField] private float _speed;
         [SerializeField] private float _allowPlayerRotation;
-        [SerializeField] private float _verticalVel;
-        [SerializeField] private Vector3 _moveVector;
         [SerializeField] private LayerMask _groundLayer;
+        
+        private float _speed;
+        private Vector3 _moveVector;
+        private Vector3 _desiredMoveDirection;
 
         private Transform _cameraTransform;
         private PlayerInput _playerInput;
@@ -34,7 +34,7 @@ namespace Character
         {
             InputMagnitude();
 
-            Gravity();
+            //Gravity();
         }
 
         private void FixedUpdate()
@@ -46,16 +46,9 @@ namespace Character
         
         private void Gravity()
         {
-            if (_isGrounded)
-            {
-                _verticalVel = 0;
-            }
-            else
-            {
-                _verticalVel -= 2;
-            }
+            float verticalVel = _isGrounded ? 0 : _gravity;
 
-            _moveVector = Vector3.up * (_verticalVel * Time.deltaTime);
+            _moveVector = Vector3.up * (verticalVel * Time.deltaTime);
             _characterController.Move(_moveVector);
         }
 
@@ -96,11 +89,14 @@ namespace Character
             }
         }
 
+        public float GetSpeed() => _speed;
+
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.red;
-            var from = transform.position + Vector3.up;
-            Gizmos.DrawLine(from, from + Vector3.down * (_characterHeight * 2f + 0.5f));
+            
+            Vector3 from = transform.position + Vector3.up;
+            Gizmos.DrawRay(from, Vector3.down * (_characterHeight * 2f + 0.5f));
         }
     }
 }
