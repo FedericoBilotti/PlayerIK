@@ -172,7 +172,7 @@ namespace Character
 
         private void ApplyAnimationValues()
         {
-            Vector3 input = _playerInput.InputMovement;
+            Vector2 input = _playerInput.InputMovement;
 
             _animatorController.SetFloat("Vertical", input.y);
             _animatorController.SetFloat("Horizontal", input.x);
