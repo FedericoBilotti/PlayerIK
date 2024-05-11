@@ -1,11 +1,12 @@
+using System;
+using Sensor;
 using UnityEngine;
-using Quaternion = UnityEngine.Quaternion;
-using Vector3 = UnityEngine.Vector3;
+using Utilities;
 
 namespace Character
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class PlayerMovementRigidbody : MonoBehaviour
+    public class PlayerMovement : MonoBehaviour
     {
         [Header("Settings")]
         [Header("Player")]
@@ -13,6 +14,7 @@ namespace Character
 
         [Header("Velocity")]
         [SerializeField] private float _speed = 10f;
+        [SerializeField] private float _maxSpeed = 10f;
         [SerializeField, Range(0f, 1f)] private float _dampSmoothness = .1f;
 
         [Header("Rotations")]
@@ -21,26 +23,23 @@ namespace Character
         private float _actualSpeed;
 
         [Header("Slope Check")]
-        [SerializeField] private float _slopeDistanceDown = 1.4f;
-        [SerializeField] private float _speedOnSlope = 10f;
+        [SerializeField] private float _slopeRayLength = 1.4f;
         [SerializeField] private float _downSpeedOnSlope = 5f;
         [SerializeField] private float _slopeAngleLimit = 85f;
-        [SerializeField] private LayerMask _slopeDownLayer;
-        private RaycastHit _slopeHit;
+        [SerializeField] private LayerMask _slopeLayer;
+        private ISensor _slopeSensor;
 
         [Header("Ground check")]
-        [SerializeField] private float _distanceToGround = 0.5f;
-
+        [SerializeField] private float _groundRayLength = 0.6f;
         [SerializeField] private LayerMask _groundLayer;
+        private ISensor _groundSensor;
 
         private AnimatorController _animatorController;
         private PlayerInput _playerInput;
         private Rigidbody _rigidbody;
         private Transform _cameraTransform;
         private Transform _myTransform;
-
-        private bool _onGround;
-        private bool _onSlope;
+        
         private Vector3 _velocityRootMotion;
 
         private void Awake()
@@ -48,39 +47,43 @@ namespace Character
             _animatorController = GetComponent<AnimatorController>();
             _playerInput = GetComponent<PlayerInput>();
 
-            _cameraTransform = Camera.main.transform;
-            _myTransform = transform;
-
             _rigidbody = GetComponent<Rigidbody>();
             _rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
             _rigidbody.drag = 5;
+            
+            _cameraTransform = Camera.main.transform;
+            _myTransform = transform;
+        }
+
+        private void Start()
+        {
+            _groundSensor = new GroundSensor(_myTransform, _playerHeight, _groundRayLength, _groundLayer);
+            _slopeSensor = new SlopeSensor(this, _myTransform, _playerHeight, _slopeRayLength, _slopeAngleLimit, _slopeLayer);
         }
 
         private void Update()
         {
-            _rigidbody.drag = _onGround ? 5 : 0;
+            _rigidbody.drag = _groundSensor.OnCollision ? 5 : 0;
 
             ApplyAnimationValues();
         }
 
         public void FixedUpdate()
         {
-            _onGround = OnGround();
-            _onSlope = OnSlope();
+            UpdateSensors();
+            
+            RestrictVelocity();
             MoveAndRotateCharacter(Time.fixedDeltaTime);
         }
 
-        private void OnAnimatorMove()
-        {
-            _velocityRootMotion += _animatorController.Animator.deltaPosition;
-        }
+        private void OnAnimatorMove() => _velocityRootMotion += _animatorController.Animator.deltaPosition;
 
         private void MoveAndRotateCharacter(float fixedDelta)
         {
             if (_actualSpeed < _allowRotation) return;
 
-            Vector3 cameraForward = NormalizeVector3(_cameraTransform.forward);
-            Vector3 cameraRight = NormalizeVector3(_cameraTransform.right);
+            Vector3 cameraForward = ExtensionMethodsVector3.NormalizeVector3WithoutY(_cameraTransform.forward);
+            Vector3 cameraRight = ExtensionMethodsVector3.NormalizeVector3WithoutY(_cameraTransform.right);
 
             Vector3 positionTarget = _playerInput.InputMovement.x * cameraRight + _playerInput.InputMovement.y * cameraForward;
             positionTarget.y = 0;
@@ -89,29 +92,27 @@ namespace Character
 
             Vector3 rootTarget = _velocityRootMotion + positionTarget;
 
-            if (_onSlope)
+            if (_slopeSensor.OnCollision)
             {
-                Vector3 direction = Vector3.ProjectOnPlane(rootTarget, _slopeHit.normal);
-                _rigidbody.AddForce(direction.normalized * (_speedOnSlope * 100f * fixedDelta), ForceMode.Force);
+                Vector3 direction = Vector3.ProjectOnPlane(rootTarget, _slopeSensor.Hit.normal);
+                Move(direction.normalized, _speed, fixedDelta);
 
                 if (_rigidbody.velocity.y > 0)
                 {
-                    _rigidbody.AddForce(Vector3.down * (_downSpeedOnSlope * 100f * fixedDelta), ForceMode.Force);
+                    Move(Vector3.down, _downSpeedOnSlope, fixedDelta);
                 }
             }
             else
             {
-                _rigidbody.AddForce(rootTarget.normalized * (_speed * 100f * fixedDelta), ForceMode.Force);
+                Move(rootTarget.normalized, _speed, fixedDelta);
             }
 
             _velocityRootMotion = Vector3.zero;
         }
 
-        private Vector3 NormalizeVector3(Vector3 vector)
+        public void Move(Vector3 direction, float velocity, float fixedDelta)
         {
-            Vector3 newVector = vector;
-            newVector.y = 0;
-            return newVector.normalized;
+            _rigidbody.AddForce(direction * (velocity * 100f * fixedDelta), ForceMode.Force);
         }
 
         private void Rotation(Vector3 positionTarget)
@@ -121,29 +122,37 @@ namespace Character
             _rigidbody.rotation = newRotation;
         }
 
-        private bool OnGround()
+        private void RestrictVelocity()
         {
-            Vector3 from = _myTransform.position + Vector3.up * _playerHeight;
-            return Physics.Raycast(from, Vector3.down, out _slopeHit, _distanceToGround, _groundLayer);
-        }
-
-        private bool OnSlope()
-        {
-            Vector3 from = _myTransform.position + Vector3.up * _playerHeight;
-            
-            if (Physics.Raycast(from, Vector3.down, out _slopeHit, _slopeDistanceDown, _slopeDownLayer))
+            if (_slopeSensor.OnCollision)
             {
-                float angle = Vector3.Angle(Vector3.up, _slopeHit.normal);
-                
-                if (angle < _slopeAngleLimit && angle != 0)
-                {
-                    return true;
-                }
-                
-                _rigidbody.AddForce(-_slopeHit.transform.forward * (7f * 100f * Time.fixedDeltaTime), ForceMode.Force);
+                RestrictVelocityOnSlope();
+                return;
             }
 
-            return false;
+            RestrictVelocityInGround();
+        }
+
+        private void RestrictVelocityOnSlope()
+        {
+            if (_rigidbody.velocity.magnitude < _maxSpeed) return;
+            
+            _rigidbody.velocity = _rigidbody.velocity.normalized * _maxSpeed;
+        }
+
+        private void RestrictVelocityInGround()
+        {
+            Vector3 previousVelocity = new Vector3(_rigidbody.velocity.x, 0, _rigidbody.velocity.z);
+
+            if (previousVelocity.magnitude < _maxSpeed) return;
+            Vector3 newVel = previousVelocity.normalized * _maxSpeed;
+            _rigidbody.velocity = new Vector3(newVel.x, _rigidbody.velocity.y, newVel.z);
+        }
+
+        private void UpdateSensors()
+        {
+            _groundSensor.Execute();
+            _slopeSensor.Execute();
         }
 
         private void ApplyAnimationValues()
@@ -162,14 +171,13 @@ namespace Character
 
         private void OnDrawGizmos()
         {
+            Vector3 from = transform.position + Vector3.up * _playerHeight;
+            
             Gizmos.color = Color.red;
-            var tr = transform;
-            Vector3 position = tr.position;
-            Vector3 from = position + Vector3.up * _playerHeight;
-            Gizmos.DrawRay(from, Vector3.down * _slopeDistanceDown);
+            Gizmos.DrawRay(from, Vector3.down * _slopeRayLength);
 
             Gizmos.color = Color.magenta;
-            Gizmos.DrawRay(from, Vector3.down * _distanceToGround);
+            Gizmos.DrawRay(from, Vector3.down * _groundRayLength);
         }
 
         #endregion

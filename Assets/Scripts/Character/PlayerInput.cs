@@ -8,10 +8,10 @@ namespace Character
 
         public Vector2 InputMovement { get; private set; }
 
-        private void OnEnable() => _playerInputController.OnMove += InputMove;
-        private void OnDisable() => _playerInputController.OnMove -= InputMove;
+        private void OnEnable() => _playerInputController.OnMove += GetInputMovement;
+        private void OnDisable() => _playerInputController.OnMove -= GetInputMovement;
 
-        private void InputMove(Vector2 inputMovement)
+        private void GetInputMovement(Vector2 inputMovement)
         {
             InputMovement = inputMovement;
         }

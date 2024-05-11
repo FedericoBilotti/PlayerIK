@@ -297,7 +297,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 127280987}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15047346, y: 0.14330424, z: -0.022050267, w: 0.97792405}
+  m_LocalRotation: {x: 0.15047118, y: 0.1434061, z: -0.022065938, w: 0.97790915}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -423,7 +423,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15047346, y: 0.14330424, z: -0.022050267, w: 0.97792405}
+  m_LocalRotation: {x: 0.15047118, y: 0.1434061, z: -0.022065938, w: 0.97790915}
   m_LocalPosition: {x: 5.7179313, y: 2.1097527, z: 2.112708}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -853,7 +853,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 620574003}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15047346, y: 0.14330424, z: -0.022050267, w: 0.97792405}
+  m_LocalRotation: {x: 0.15047118, y: 0.1434061, z: -0.022065938, w: 0.97790915}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1196,7 +1196,7 @@ MonoBehaviour:
   _feetToIkPositionSpeed: 58.5
   _environmentLayer:
     serializedVersion: 2
-    m_Bits: 375
+    m_Bits: 320
   _rightFootName: RightFootIK
   _leftFootName: LeftFootIK
   _animatorController: {fileID: 1225695599}
@@ -1242,17 +1242,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerHeight: 0.5
   _speed: 10
+  _maxSpeed: 2
   _dampSmoothness: 0.1
   _allowRotation: 0.3
   _smoothnessRotation: 10
-  _slopeDistanceDown: 1.4
-  _speedOnSlope: 20
-  _downSpeedOnSlope: 5
+  _slopeRayLength: 1.4
+  _downSpeedOnSlope: 2
   _slopeAngleLimit: 35
-  _slopeDownLayer:
+  _slopeLayer:
     serializedVersion: 2
     m_Bits: 256
-  _distanceToGround: 0.6
+  _groundRayLength: 0.6
   _groundLayer:
     serializedVersion: 2
     m_Bits: 320
@@ -1276,9 +1276,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.15
-  m_Height: 1.75
+  m_Height: 1.6505752
   m_Direction: 1
-  m_Center: {x: 0, y: 0.91, z: 0}
+  m_Center: {x: 0, y: 0.9597125, z: 0}
 --- !u!136 &1225695608
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1948,8 +1948,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2039933050}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15047345, y: 0.14330426, z: -0.022050267, w: 0.97792405}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0.083313994, y: 0.1444181, z: -0.012203782, w: 0.98592764}
+  m_LocalPosition: {x: 0, y: -0.14056587, z: -0.662426}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
