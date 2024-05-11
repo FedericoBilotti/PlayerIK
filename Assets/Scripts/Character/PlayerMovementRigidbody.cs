@@ -21,13 +21,6 @@ namespace Character
         [SerializeField] private float _smoothnessRotation = 10f;
         private float _actualSpeed;
 
-        [Header("Wall Check")]
-        [SerializeField, Range(1, 30)] private int _totalRays = 8;
-        [SerializeField, Range(0.1f, 4f)] private float _wallDistanceForward = .25f;
-        [SerializeField, Range(0.01f, 1f)] private float _lineDistance = 0.05f;
-        [SerializeField] private LayerMask _wallForwardLayer;
-        private RaycastHit[] _wallHits;
-
         [Header("Slope Check")]
         [SerializeField] private float _slopeDistanceDown = 1.4f;
         [SerializeField] private float _speedOnSlope = 10f;
@@ -47,7 +40,6 @@ namespace Character
         private Transform _cameraTransform;
         private Transform _myTransform;
 
-        private bool _wallForward;
         private bool _onGround;
         private bool _onSlope;
         private Vector3 _velocityRootMotion;
@@ -74,11 +66,6 @@ namespace Character
 
         public void FixedUpdate()
         {
-            foreach (bool predicate in IsWallForward(out int index))
-            {
-                _wallForward = predicate;
-            }
-
             _onGround = OnGround();
             _onSlope = OnSlope();
             MoveAndRotateCharacter(Time.fixedDeltaTime);
@@ -135,27 +122,6 @@ namespace Character
             _rigidbody.rotation = newRotation;
         }
 
-        private bool[] IsWallForward(out int index)
-        {
-            bool[] result = new bool[_totalRays];
-            _wallHits = new RaycastHit[_totalRays];
-
-            Vector3 from = _myTransform.position + Vector3.up;
-            Vector3 upDirection = _myTransform.up;
-            Vector3 startRayPosition = from + Vector3.up - upDirection * (_lineDistance * (_totalRays - 1) / 2f);
-            index = 0;
-
-            for (int i = 0; i < _totalRays; i++)
-            {
-                Vector3 origin = startRayPosition + upDirection * (_lineDistance * i);
-                result[i] = Physics.Raycast(origin, _myTransform.forward, out RaycastHit hit, _wallDistanceForward, _wallForwardLayer);
-                _wallHits[i] = hit;
-                index = i;
-            }
-
-            return result;
-        }
-
         private bool OnGround()
         {
             Vector3 from = _myTransform.position + Vector3.up * _playerHeight;
@@ -205,17 +171,6 @@ namespace Character
 
             Gizmos.color = Color.magenta;
             Gizmos.DrawRay(from, Vector3.down * _distanceToGround);
-
-            Gizmos.color = Color.blue;
-
-            Vector3 upDirection = tr.up;
-            Vector3 startRayPosition = position + Vector3.up - upDirection * (_lineDistance * (_totalRays - 1) / 2f);
-
-            for (int i = 0; i < _totalRays; i++)
-            {
-                Vector3 from2 = startRayPosition + upDirection * (_lineDistance * i);
-                Gizmos.DrawRay(from2, tr.forward * _wallDistanceForward);
-            }
         }
 
         #endregion
