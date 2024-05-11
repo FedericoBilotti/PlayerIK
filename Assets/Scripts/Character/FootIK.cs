@@ -107,7 +107,7 @@ namespace Character
         private void FeetPositionSolver(Vector3 footPosition, ref Vector3 footIKPosition, ref Quaternion feetIKRotation)
         {
             Vector3 direction = Vector3.down;
-            float distance = _raycastDownDistance * _heightFromGroundRaycast;
+            float distance = _raycastDownDistance + _heightFromGroundRaycast;
 
             if (Physics.Raycast(footPosition, direction, out RaycastHit hit, distance, _environmentLayer))
             {
@@ -140,6 +140,8 @@ namespace Character
         
         private void OnDrawGizmos()
         {
+            if (!_enabled) return;
+            
             Gizmos.color = Color.yellow;
 
             Vector3 rightFoot = _animatorController.Animator.GetBoneTransform(HumanBodyBones.RightFoot).position;

@@ -14,7 +14,6 @@ namespace Character
         [Header("Velocity")]
         [SerializeField] private float _speed = 10f;
         [SerializeField] private float _maxSpeed = 10f;
-        [SerializeField, Range(0f, 1f)] private float _dampSmoothness = .1f;
 
         [Header("Rotations")]
         [SerializeField, Range(0f, 1f)] private float _allowRotation = 0.3f;
@@ -26,19 +25,22 @@ namespace Character
         [SerializeField] private float _downSpeedOnSlope = 5f;
         [SerializeField] private float _slopeAngleLimit = 85f;
         [SerializeField] private LayerMask _slopeLayer;
-        private ISensor _slopeSensor;
 
         [Header("Ground check")]
-        [SerializeField] private float _groundRayLength = 0.6f;
+        [SerializeField, Range(0.01f, 1f)] private float _groundRadius = 0.6f;
+        [SerializeField, Range(0.01f, 2f)] private float _groundCheckDistance = 0.6f;
         [SerializeField] private LayerMask _groundLayer;
+
+        private ISensor _slopeSensor;
         private ISensor _groundSensor;
+        private ISensor[] _sensors;
 
         private AnimatorController _animatorController;
         private PlayerInput _playerInput;
-        private Rigidbody _rigidbody;
         private Transform _cameraTransform;
         private Transform _myTransform;
-        
+        private Rigidbody _rigidbody;
+
         private Vector3 _velocityRootMotion;
 
         private void Awake()
@@ -49,15 +51,18 @@ namespace Character
             _rigidbody = GetComponent<Rigidbody>();
             _rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
             _rigidbody.drag = 5;
-            
+
             _cameraTransform = Camera.main.transform;
             _myTransform = transform;
         }
 
         private void Start()
         {
-            _groundSensor = new GroundSensor(_myTransform, _playerHeight, _groundRayLength, _groundLayer);
-            _slopeSensor = new SlopeSensor(this, _myTransform, _playerHeight, _slopeRayLength, _slopeAngleLimit, _slopeLayer);
+            _sensors = new[]
+            { 
+                _groundSensor = new GroundSensor(_myTransform, _playerHeight, _groundRadius, _groundCheckDistance, _groundLayer),
+                _slopeSensor = new SlopeSensor(this, _myTransform, _playerHeight, _slopeRayLength, _slopeAngleLimit, _slopeLayer)
+            };
         }
 
         private void Update()
@@ -70,7 +75,7 @@ namespace Character
         public void FixedUpdate()
         {
             UpdateSensors();
-            
+
             RestrictVelocity();
             MoveAndRotateCharacter(Time.fixedDeltaTime);
         }
@@ -144,7 +149,7 @@ namespace Character
         private void RestrictVelocityOnSlope()
         {
             if (_rigidbody.velocity.magnitude < _maxSpeed) return;
-            
+
             _rigidbody.velocity = _rigidbody.velocity.normalized * _maxSpeed;
         }
 
@@ -159,33 +164,37 @@ namespace Character
 
         private void UpdateSensors()
         {
-            _groundSensor.Execute();
-            _slopeSensor.Execute();
+            foreach (ISensor sensor in _sensors)
+            {
+                sensor.Execute();
+            }
         }
 
         private void ApplyAnimationValues()
         {
             Vector3 input = _playerInput.InputMovement;
 
-            _animatorController.SetFloat("Vertical", input.y, _dampSmoothness, Time.deltaTime);
-            _animatorController.SetFloat("Horizontal", input.x, _dampSmoothness, Time.deltaTime);
+            _animatorController.SetFloat("Vertical", input.y);
+            _animatorController.SetFloat("Horizontal", input.x);
 
             _actualSpeed = _playerInput.InputMovement.sqrMagnitude;
 
-            _animatorController.SetFloat("InputMagnitude", _actualSpeed, _dampSmoothness, Time.deltaTime);
+            _animatorController.SetFloat("InputMagnitude", _actualSpeed);
         }
 
         #region Gizmos
 
         private void OnDrawGizmos()
         {
-            Vector3 from = transform.position + Vector3.up * _playerHeight;
-            
+            Vector3 bodyPosition = transform.position + Vector3.up * _playerHeight;
+
             Gizmos.color = Color.red;
-            Gizmos.DrawRay(from, Vector3.down * _slopeRayLength);
+            Gizmos.DrawRay(bodyPosition, Vector3.down * _slopeRayLength);
 
             Gizmos.color = Color.magenta;
-            Gizmos.DrawRay(from, Vector3.down * _groundRayLength);
+            Gizmos.DrawRay(bodyPosition, Vector3.down * _groundCheckDistance);
+            Gizmos.DrawWireSphere(bodyPosition, _groundRadius);
+            Gizmos.DrawWireSphere(bodyPosition + Vector3.down * _groundCheckDistance, _groundRadius);
         }
 
         #endregion

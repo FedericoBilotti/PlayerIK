@@ -297,7 +297,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 127280987}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15047118, y: 0.1434061, z: -0.022065938, w: 0.97790915}
+  m_LocalRotation: {x: 0.14999606, y: 0.14279564, z: -0.021898912, w: 0.9780752}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -423,8 +423,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15047118, y: 0.1434061, z: -0.022065938, w: 0.97790915}
-  m_LocalPosition: {x: 5.7179313, y: 2.1097527, z: 2.112708}
+  m_LocalRotation: {x: 0.14999606, y: 0.14279564, z: -0.021898912, w: 0.9780752}
+  m_LocalPosition: {x: 1.7100446, y: 2.1257877, z: -2.4234076}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -757,7 +757,7 @@ Transform:
   m_GameObject: {fileID: 462220312}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.7179313, y: 2.1097527, z: 2.112708}
+  m_LocalPosition: {x: 1.7100446, y: 2.1257877, z: -2.4234076}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -853,7 +853,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 620574003}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15047118, y: 0.1434061, z: -0.022065938, w: 0.97790915}
+  m_LocalRotation: {x: 0.14999606, y: 0.14279564, z: -0.021898912, w: 0.9780752}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1105,8 +1105,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1225695592}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.9493629, z: 0, w: 0.31418177}
-  m_LocalPosition: {x: 5.72, y: -0.141, z: 3.86}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.71, y: -0.12496519, z: -0.67}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1114,7 +1114,7 @@ Transform:
   - {fileID: 2123082568}
   - {fileID: 284101317}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 143.377, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1225695596
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1153,7 +1153,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 973610afeca639b4da897e2a6898f614, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <Animator>k__BackingField: {fileID: 1225695600}
+  _dampSmoothness: 0.1
+  _animator: {fileID: 1225695600}
 --- !u!95 &1225695600
 Animator:
   serializedVersion: 7
@@ -1191,7 +1192,7 @@ MonoBehaviour:
   _enabled: 1
   _pelvisOffset: 0
   _heightFromGroundRaycast: 1.14
-  _raycastDownDistance: 1.4
+  _raycastDownDistance: 0.5
   _pelvisUpDownSpeed: 68
   _feetToIkPositionSpeed: 58.5
   _environmentLayer:
@@ -1243,7 +1244,6 @@ MonoBehaviour:
   _playerHeight: 0.5
   _speed: 10
   _maxSpeed: 2
-  _dampSmoothness: 0.1
   _allowRotation: 0.3
   _smoothnessRotation: 10
   _slopeRayLength: 1.4
@@ -1252,7 +1252,8 @@ MonoBehaviour:
   _slopeLayer:
     serializedVersion: 2
     m_Bits: 256
-  _groundRayLength: 0.6
+  _groundRadius: 0.097
+  _groundCheckDistance: 0.47
   _groundLayer:
     serializedVersion: 2
     m_Bits: 320
@@ -1276,9 +1277,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.15
-  m_Height: 1.6505752
+  m_Height: 1.7444798
   m_Direction: 1
-  m_Center: {x: 0, y: 0.9597125, z: 0}
+  m_Center: {x: 0, y: 0.9127602, z: 0}
 --- !u!136 &1225695608
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1948,8 +1949,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2039933050}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.083313994, y: 0.1444181, z: -0.012203782, w: 0.98592764}
-  m_LocalPosition: {x: 0, y: -0.14056587, z: -0.662426}
+  m_LocalRotation: {x: -0.13772379, y: 0.143063, z: 0.020107783, w: 0.979878}
+  m_LocalPosition: {x: 0, y: -1.2988219, z: -0.85520506}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

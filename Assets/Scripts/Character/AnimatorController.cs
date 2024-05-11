@@ -4,14 +4,18 @@ namespace Character
 {
     public class AnimatorController : MonoBehaviour
     {
-        [field: SerializeField] public Animator Animator { get; private set; }
+        [Header("Animation")]
+        [SerializeField, Range(0f, 1f)] private float _dampSmoothness = .1f;
+
+        [SerializeField] private Animator _animator;
+        public Animator Animator => _animator;
 
         private void Awake()
         {
-            Animator = GetComponentInChildren<Animator>();
+            _animator = GetComponentInChildren<Animator>();
         }
 
-        public float GetFloat(string name) => Animator.GetFloat(name);
-        public void SetFloat(string name, float value, float dampTime = 0f, float deltaTime = 0f) => Animator.SetFloat(name, value, dampTime, deltaTime);
+        public float GetFloat(string name) => _animator.GetFloat(name);
+        public void SetFloat(string name, float value) => _animator.SetFloat(name, value, _dampSmoothness, Time.deltaTime);
     }
 }

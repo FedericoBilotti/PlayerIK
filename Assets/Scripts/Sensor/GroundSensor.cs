@@ -6,18 +6,20 @@ namespace Sensor
     {
         private readonly Transform _myTransform;
         private readonly float _playerHeight;
-        private readonly float _rayLength;
+        private readonly float _radius;
+        private readonly float _maxDistance;
         private readonly LayerMask _groundLayer;
 
         public bool OnCollision { get; private set; }
         public RaycastHit Hit => _hit;
         private RaycastHit _hit;
 
-        public GroundSensor(Transform myTransform, float playerHeight, float rayLength, LayerMask groundLayer)
+        public GroundSensor(Transform myTransform, float playerHeight, float radius, float maxDistance, LayerMask groundLayer)
         {
             _myTransform = myTransform;
             _playerHeight = playerHeight;
-            _rayLength = rayLength;
+            _radius = radius;
+            _maxDistance = maxDistance;
             _groundLayer = groundLayer;
         }
 
@@ -29,7 +31,8 @@ namespace Sensor
         private bool OnGround()
         {
             Vector3 from = _myTransform.position + Vector3.up * _playerHeight;
-            return Physics.Raycast(from, Vector3.down, out _hit, _rayLength, _groundLayer);
+            return Physics.SphereCast(from, _radius, Vector3.down, out _hit, _maxDistance, _groundLayer);
+            //return Physics.CheckSphere(from, _radius, _groundLayer);
         }
     }
 }
