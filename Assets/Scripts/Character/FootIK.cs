@@ -12,12 +12,6 @@ namespace Character
         [SerializeField, Range(0f, 100f)] private float _pelvisUpDownSpeed = 0.28f;
         [SerializeField, Range(0f, 100f)] private float _feetToIkPositionSpeed = 0.5f;
         [SerializeField] private LayerMask _environmentLayer;
-        
-        [Header("Running")]
-        [SerializeField, Range(0f, 100f)] private float _smoothnessFuturePosition = 1f;
-        [SerializeField, Range(0f, 1f)] private float _minFuturePosition;
-        [SerializeField, Range(0f, 1f)] private float _maxFuturePosition = 1f;
-        private float _futurePosition;
 
         [Header("Animator Curves Names")]
         [SerializeField] private string _rightFootName = "RightFootIK";
@@ -112,12 +106,10 @@ namespace Character
 
         private void FeetPositionSolver(Vector3 footPosition, ref Vector3 footIKPosition, ref Quaternion feetIKRotation)
         {
-            FuturePositionHandler();
-            Vector3 origin = footPosition + transform.forward * _futurePosition;
             Vector3 direction = Vector3.down;
             float distance = _raycastDownDistance * _heightFromGroundRaycast;
 
-            if (Physics.Raycast(origin, direction, out RaycastHit hit, distance, _environmentLayer))
+            if (Physics.Raycast(footPosition, direction, out RaycastHit hit, distance, _environmentLayer))
             {
                 footIKPosition = footPosition;
                 footIKPosition.y = hit.point.y + _pelvisOffset;
@@ -127,17 +119,6 @@ namespace Character
             }
 
             footIKPosition = Vector3.zero;
-        }
-
-        private void FuturePositionHandler()
-        {
-            if (_playerInput.InputMovement.sqrMagnitude > 0)
-            {
-                _futurePosition = Mathf.Lerp(_futurePosition, _maxFuturePosition, _smoothnessFuturePosition * Time.deltaTime);
-                return;
-            }
-
-            _futurePosition = Mathf.Lerp(_futurePosition, _minFuturePosition, _smoothnessFuturePosition * Time.deltaTime);
         }
 
         private void AdjustFeetTarget(ref Vector3 feetPositions, HumanBodyBones foot)
@@ -155,17 +136,18 @@ namespace Character
             _animatorController.Animator.SetIKRotationWeight(AvatarIKGoal.LeftFoot, _animatorController.Animator.GetFloat(_leftFootName));
         }
 
+        #region Gizmos
+        
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.yellow;
 
-            Vector3 forward = transform.forward;
             Vector3 rightFoot = _animatorController.Animator.GetBoneTransform(HumanBodyBones.RightFoot).position;
             Vector3 leftFoot = _animatorController.Animator.GetBoneTransform(HumanBodyBones.LeftFoot).position;
-            Vector3 originRightFoot = rightFoot + forward * _futurePosition;
-            Vector3 originLeftFoot = leftFoot + forward * _futurePosition;
-            Gizmos.DrawRay(originRightFoot, Vector3.down * (_raycastDownDistance * _heightFromGroundRaycast));
-            Gizmos.DrawRay(originLeftFoot, Vector3.down * (_raycastDownDistance * _heightFromGroundRaycast));
+            Gizmos.DrawRay(rightFoot, Vector3.down * (_raycastDownDistance * _heightFromGroundRaycast));
+            Gizmos.DrawRay(leftFoot, Vector3.down * (_raycastDownDistance * _heightFromGroundRaycast));
         }
+
+        #endregion
     }
 }
