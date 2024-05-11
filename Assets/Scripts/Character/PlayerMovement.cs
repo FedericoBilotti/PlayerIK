@@ -1,4 +1,3 @@
-using System;
 using Sensor;
 using UnityEngine;
 using Utilities;
@@ -82,20 +81,15 @@ namespace Character
         {
             if (_actualSpeed < _allowRotation) return;
 
-            Vector3 cameraForward = ExtensionMethodsVector3.NormalizeVector3WithoutY(_cameraTransform.forward);
-            Vector3 cameraRight = ExtensionMethodsVector3.NormalizeVector3WithoutY(_cameraTransform.right);
-
-            Vector3 positionTarget = _playerInput.InputMovement.x * cameraRight + _playerInput.InputMovement.y * cameraForward;
-            positionTarget.y = 0;
+            Vector3 positionTarget = GetPositionTarget();
 
             Rotation(positionTarget);
 
             Vector3 rootTarget = _velocityRootMotion + positionTarget;
 
-            if (_slopeSensor.OnCollision)
+            if (_slopeSensor.OnCollision) // Move to FSM
             {
-                Vector3 direction = Vector3.ProjectOnPlane(rootTarget, _slopeSensor.Hit.normal);
-                Move(direction.normalized, _speed, fixedDelta);
+                Move(GetSlopeDirection(rootTarget).normalized, _speed, fixedDelta);
 
                 if (_rigidbody.velocity.y > 0)
                 {
@@ -110,7 +104,21 @@ namespace Character
             _velocityRootMotion = Vector3.zero;
         }
 
-        public void Move(Vector3 direction, float velocity, float fixedDelta)
+        private Vector3 GetPositionTarget()
+        {
+            Vector3 forward = _cameraTransform.forward.NormalizeWithoutY();
+            Vector3 right = _cameraTransform.right.NormalizeWithoutY();
+
+            Vector3 positionTarget = _playerInput.InputMovement.x * right + _playerInput.InputMovement.y * forward;
+            return positionTarget;
+        }
+
+        private Vector3 GetSlopeDirection(Vector3 direction)
+        {
+            return Vector3.ProjectOnPlane(direction, _slopeSensor.Hit.normal);
+        }
+
+        private void Move(Vector3 direction, float velocity, float fixedDelta)
         {
             _rigidbody.AddForce(direction * (velocity * 100f * fixedDelta), ForceMode.Force);
         }
