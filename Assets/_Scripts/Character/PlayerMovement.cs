@@ -80,6 +80,7 @@ namespace Character
                 _stairSensor = new StairSensor(_myTransform, _playerHeight, _stairHeight, _stairRayLowerLength, _stairRayUpperLength, 
                         _startRayLower, _startRayUpper, _totalRays, _angleRays, _offset, _stairLayer)
             };
+            
         }
 
         private void Update()
@@ -93,39 +94,13 @@ namespace Character
         {
             UpdateSensors();
 
+            //MoveAndRotateCharacter(Time.fixedDeltaTime);
             RestrictVelocity();
-            MoveAndRotateCharacter(Time.fixedDeltaTime);
         }
 
         private void OnAnimatorMove() => _velocityRootMotion += _animatorController.Animator.deltaPosition;
 
-        private void MoveAndRotateCharacter(float fixedDelta)
-        {
-            if (_actualSpeed < _allowRotation) return;
-
-            Vector3 directionTarget = GetDirectionTarget(); 
-
-            Rotation(directionTarget);
-
-            Vector3 rootTarget = _velocityRootMotion + directionTarget;
-
-            if (_slopeSensor.OnCollision) // Move to FSM
-            {
-                MoveInSlope(fixedDelta, rootTarget);
-            }
-            else if (_stairSensor.OnCollision)
-            {
-                MoveInStairs();
-            }
-            else
-            {
-                MoveInGround(rootTarget.normalized, _speed, fixedDelta);
-            }
-
-            _velocityRootMotion = Vector3.zero;
-        }
-
-        private Vector3 GetDirectionTarget()
+        public Vector3 GetDirectionTarget()
         {
             Vector3 forward = _cameraTransform.forward.NormalizeWithoutY();
             Vector3 right = _cameraTransform.right.NormalizeWithoutY();
@@ -134,14 +109,16 @@ namespace Character
             return positionTarget;
         }
 
-        private void MoveInSlope(float fixedDelta, Vector3 rootTarget)
+        public void MoveInSlope(Vector3 rootTarget)
         {
-            MoveInGround(GetSlopeDirection(rootTarget).normalized, _speed, fixedDelta);
+            MoveInGround(GetSlopeDirection(rootTarget).normalized);
 
             if (_rigidbody.velocity.y > 0)
             {
-                MoveInGround(Vector3.down, _downSpeedOnSlope, fixedDelta);
+                MoveInGround(Vector3.down * _downSpeedOnSlope);
             }
+
+            _velocityRootMotion = Vector3.zero;
         }
 
         private Vector3 GetSlopeDirection(Vector3 direction)
@@ -149,17 +126,19 @@ namespace Character
             return Vector3.ProjectOnPlane(direction, _slopeSensor.Hit.normal);
         }
 
-        private void MoveInGround(Vector3 direction, float velocity, float fixedDelta)
+        public void MoveInGround(Vector3 direction)
         {
-            _rigidbody.AddForce(direction * (velocity * 100f * fixedDelta), ForceMode.Force);
+            _rigidbody.AddForce(direction * (_speed * 100f * Time.fixedDeltaTime), ForceMode.Force);
+            _velocityRootMotion = Vector3.zero;
         }
 
-        private void MoveInStairs()
+        public void MoveInStairs()
         {
             _rigidbody.position += new Vector3(0, _moveSmoothness, 0) * Time.fixedDeltaTime;
+            _velocityRootMotion = Vector3.zero;
         }
 
-        private void Rotation(Vector3 positionTarget)
+        public void Rotation(Vector3 positionTarget)
         {
             Quaternion desiredRotation = Quaternion.LookRotation(positionTarget.normalized);
             Quaternion newRotation = Quaternion.Slerp(_myTransform.rotation, desiredRotation, _smoothnessRotation * Time.fixedDeltaTime);
@@ -212,6 +191,13 @@ namespace Character
 
             _animatorController.SetFloat("InputMagnitude", _actualSpeed);
         }
+
+        public ISensor GetGroundSensor() => _groundSensor;
+        public ISensor GetStairSensor() => _stairSensor;
+        public ISensor GetSlopeSensor() => _slopeSensor;
+        public bool CanMove() => _actualSpeed > _allowRotation;
+
+        public Vector3 VelocityRootMotion() => _velocityRootMotion;
 
         #region Gizmos
 
