@@ -103,11 +103,11 @@ namespace Character
         {
             if (_actualSpeed < _allowRotation) return;
 
-            Vector3 positionTarget = GetPositionTarget();
+            Vector3 directionTarget = GetDirectionTarget(); 
 
-            Rotation(positionTarget);
+            Rotation(directionTarget);
 
-            Vector3 rootTarget = _velocityRootMotion + positionTarget;
+            Vector3 rootTarget = _velocityRootMotion + directionTarget;
 
             if (_slopeSensor.OnCollision) // Move to FSM
             {
@@ -125,7 +125,7 @@ namespace Character
             _velocityRootMotion = Vector3.zero;
         }
 
-        private Vector3 GetPositionTarget()
+        private Vector3 GetDirectionTarget()
         {
             Vector3 forward = _cameraTransform.forward.NormalizeWithoutY();
             Vector3 right = _cameraTransform.right.NormalizeWithoutY();
