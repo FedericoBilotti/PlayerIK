@@ -157,8 +157,6 @@ namespace Character
         private void MoveInStairs()
         {
             _rigidbody.position -= new Vector3(0, -_moveSmoothness, 0) * Time.fixedDeltaTime;
-            // Vector3 velocity = _rigidbody.velocity;
-            // _rigidbody.velocity += new Vector3(velocity.x, _moveSmoothness, velocity.z) * Time.fixedDeltaTime;
         }
 
         private void Rotation(Vector3 positionTarget)
