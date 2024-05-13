@@ -20,17 +20,32 @@ namespace Character
         [SerializeField] private float _smoothnessRotation = 10f;
         private float _actualSpeed;
 
+        [Header("Ground check")]
+        [SerializeField, Range(0.01f, 1f)] private float _groundRadius = 0.6f;
+        [SerializeField, Range(0.01f, 2f)] private float _groundCheckDistance = 0.6f;
+        [SerializeField] private LayerMask _groundLayer;
+
         [Header("Slope Check")]
         [SerializeField] private float _slopeRayLength = 1.4f;
         [SerializeField] private float _downSpeedOnSlope = 5f;
         [SerializeField] private float _slopeAngleLimit = 85f;
         [SerializeField] private LayerMask _slopeLayer;
 
-        [Header("Ground check")]
-        [SerializeField, Range(0.01f, 1f)] private float _groundRadius = 0.6f;
-        [SerializeField, Range(0.01f, 2f)] private float _groundCheckDistance = 0.6f;
-        [SerializeField] private LayerMask _groundLayer;
+        [Header("Stairs Values")]
+        [SerializeField, Range(0f, 1f)] private float _stairHeight = 0.2f;
+        [SerializeField, Range(0.01f, 100f)] private float _moveSmoothness = 2f;
+        [SerializeField] private LayerMask _stairLayer;
+        
+        [Header("Rays Stairs Check")]
+        [SerializeField, Range(0, 10)] private int _totalRays = 3;
+        [SerializeField, Range(1f, 360f)] private float _angleRays;
+        [SerializeField, Range(0f, 360f)] private float _offset;
+        [SerializeField, Range(0f, 1f)] private float _stairRayUpperLength = 0.2f;
+        [SerializeField, Range(-5f, 5f)] private float _startRayUpper;
+        [SerializeField, Range(0f, 1f)] private float _stairRayLowerLength = 0.2f;
+        [SerializeField, Range(-5f, 5f)] private float _startRayLower;
 
+        private ISensor _stairSensor;
         private ISensor _slopeSensor;
         private ISensor _groundSensor;
         private ISensor[] _sensors;
@@ -61,7 +76,9 @@ namespace Character
             _sensors = new[]
             { 
                 _groundSensor = new GroundSensor(_myTransform, _playerHeight, _groundRadius, _groundCheckDistance, _groundLayer),
-                _slopeSensor = new SlopeSensor(this, _myTransform, _playerHeight, _slopeRayLength, _slopeAngleLimit, _slopeLayer)
+                _slopeSensor = new SlopeSensor(this, _myTransform, _playerHeight, _slopeRayLength, _slopeAngleLimit, _slopeLayer),
+                _stairSensor = new StairSensor(_myTransform, _playerHeight, _stairHeight, _stairRayLowerLength, _stairRayUpperLength, 
+                        _startRayLower, _startRayUpper, _totalRays, _angleRays, _offset, _stairLayer)
             };
         }
 
@@ -94,16 +111,15 @@ namespace Character
 
             if (_slopeSensor.OnCollision) // Move to FSM
             {
-                Move(GetSlopeDirection(rootTarget).normalized, _speed, fixedDelta);
-
-                if (_rigidbody.velocity.y > 0)
-                {
-                    Move(Vector3.down, _downSpeedOnSlope, fixedDelta);
-                }
+                MoveInSlope(fixedDelta, rootTarget);
+            }
+            else if (_stairSensor.OnCollision)
+            {
+                MoveInStairs();
             }
             else
             {
-                Move(rootTarget.normalized, _speed, fixedDelta);
+                MoveInGround(rootTarget.normalized, _speed, fixedDelta);
             }
 
             _velocityRootMotion = Vector3.zero;
@@ -118,14 +134,31 @@ namespace Character
             return positionTarget;
         }
 
+        private void MoveInSlope(float fixedDelta, Vector3 rootTarget)
+        {
+            MoveInGround(GetSlopeDirection(rootTarget).normalized, _speed, fixedDelta);
+
+            if (_rigidbody.velocity.y > 0)
+            {
+                MoveInGround(Vector3.down, _downSpeedOnSlope, fixedDelta);
+            }
+        }
+
         private Vector3 GetSlopeDirection(Vector3 direction)
         {
             return Vector3.ProjectOnPlane(direction, _slopeSensor.Hit.normal);
         }
 
-        private void Move(Vector3 direction, float velocity, float fixedDelta)
+        private void MoveInGround(Vector3 direction, float velocity, float fixedDelta)
         {
             _rigidbody.AddForce(direction * (velocity * 100f * fixedDelta), ForceMode.Force);
+        }
+
+        private void MoveInStairs()
+        {
+            _rigidbody.position -= new Vector3(0, -_moveSmoothness, 0) * Time.fixedDeltaTime;
+            // Vector3 velocity = _rigidbody.velocity;
+            // _rigidbody.velocity += new Vector3(velocity.x, _moveSmoothness, velocity.z) * Time.fixedDeltaTime;
         }
 
         private void Rotation(Vector3 positionTarget)
@@ -195,6 +228,21 @@ namespace Character
             Gizmos.DrawRay(bodyPosition, Vector3.down * _groundCheckDistance);
             Gizmos.DrawWireSphere(bodyPosition, _groundRadius);
             Gizmos.DrawWireSphere(bodyPosition + Vector3.down * _groundCheckDistance, _groundRadius);
+           
+            Vector3 pos = transform.position;
+            Vector3 forward = transform.forward;
+            Vector3 fromLower = pos + Vector3.up * (_playerHeight * _startRayLower);
+            Vector3 fromUpper = pos + Vector3.up * (_playerHeight * _startRayUpper * _stairHeight);
+            Gizmos.color = Color.blue;
+            
+            for (int i = 0; i < _totalRays; i++)
+            {
+                float angle = i * (_angleRays / _totalRays);
+                Vector3 rayDirection = Quaternion.Euler(0, angle + _offset, 0) * forward;
+                
+                Gizmos.DrawRay(fromLower, rayDirection * _stairRayLowerLength);
+                Gizmos.DrawRay(fromUpper, rayDirection * _stairRayUpperLength);
+            }
         }
 
         #endregion

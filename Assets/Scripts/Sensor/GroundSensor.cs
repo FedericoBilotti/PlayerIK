@@ -32,7 +32,6 @@ namespace Sensor
         {
             Vector3 from = _myTransform.position + Vector3.up * _playerHeight;
             return Physics.SphereCast(from, _radius, Vector3.down, out _hit, _maxDistance, _groundLayer);
-            //return Physics.CheckSphere(from, _radius, _groundLayer);
         }
     }
 }
