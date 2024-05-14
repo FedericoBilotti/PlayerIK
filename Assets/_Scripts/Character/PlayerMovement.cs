@@ -132,7 +132,7 @@ namespace Character
             Vector3 dir = (_myTransform.up * input.y + _myTransform.right * input.x).normalized;
             
             _myTransform.rotation = Quaternion.Slerp(_myTransform.rotation, Quaternion.LookRotation(-_climbSensor.Hit.normal), _climbRotationSpeed * Time.fixedDeltaTime);
-            //_rigidbody.position = Vector3.Lerp(_rigidbody.position, );
+            //_rigidbody.position = Vector3.Lerp(_rigidbody.position, ); // ¿Soluciona bug de salirse del muro?
             _rigidbody.velocity = dir * (_climbSpeed * 100f * Time.fixedDeltaTime);
         }
 
