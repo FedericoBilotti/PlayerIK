@@ -8,6 +8,8 @@ namespace Character.States
         {
         }
 
+        public override void OnUpdate() => playerMovement.ApplyWalkingValues();
+
         public override void OnFixedUpdate()
         {
             Vector3 directionTarget = playerMovement.GetDirectionTarget(); 

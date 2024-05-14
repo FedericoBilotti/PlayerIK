@@ -17,5 +17,7 @@ namespace Character
 
         public float GetFloat(string name) => _animator.GetFloat(name);
         public void SetFloat(string name, float value) => _animator.SetFloat(name, value, _dampSmoothness, Time.deltaTime);
+        
+        public void SetBool(string name, bool value) => _animator.SetBool(name, value);
     }
 }

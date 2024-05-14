@@ -38,12 +38,12 @@ namespace Character
         [Header("Climb Values")]
         [SerializeField, Range(-2f, 2f)] private float _startRayClimb = 1f;
         [SerializeField, Range(0f, 1f)] private float _climbRayLength;
+        [SerializeField] private float _smoothnessClimb = 2f;
         [SerializeField] private float _climbSpeed;
         [SerializeField] private float _climbRotationSpeed = 10f;
         [SerializeField] private float _angleClimbRays;
         [SerializeField] private int _totalRaysClimb = 3;
         [SerializeField, Range(-360f, 360f)] private float _offsetClimbRays;
-        [SerializeField] private Collider _collision;
         [SerializeField] private LayerMask _climbLayer;
 
         [Header("Stairs Values")]
@@ -92,8 +92,6 @@ namespace Character
         private void Update()
         {
             _rigidbody.drag = _groundSensor.OnCollision ? 5 : 0;
-
-            ApplyAnimationValues();
         }
 
         public void FixedUpdate()
@@ -115,31 +113,42 @@ namespace Character
 
         public void StartClimb()
         {
+            _animatorController.Animator.applyRootMotion = false;
+            _animatorController.SetBool("Climb", true);
+            GetComponent<GroundIKController>().enabled = false;
+            GetComponent<ClimbIKController>().enabled = true;
             _rigidbody.useGravity = false;
-            _collision.enabled = false;
         }
 
         public void ClimbWall()
         {
             Vector2 input = _playerInput.InputMovement;
 
-            if (input.sqrMagnitude == 0)
+            if (input.magnitude <= 0.01f)
             {
                 _rigidbody.velocity = Vector3.zero;
                 return;
             }
 
             Vector3 dir = (_myTransform.up * input.y + _myTransform.right * input.x).normalized;
+
+            dir += _velocityRootMotion;
             
+            _rigidbody.position = Vector3.Lerp(_rigidbody.position, _climbSensor.Hit.point + _climbSensor.Hit.normal * 0.05f, _smoothnessClimb * Time.fixedDeltaTime);
             _myTransform.rotation = Quaternion.Slerp(_myTransform.rotation, Quaternion.LookRotation(-_climbSensor.Hit.normal), _climbRotationSpeed * Time.fixedDeltaTime);
-            //_rigidbody.position = Vector3.Lerp(_rigidbody.position, ); // ¿Soluciona bug de salirse del muro?
+            
             _rigidbody.velocity = dir * (_climbSpeed * 100f * Time.fixedDeltaTime);
+
+            _velocityRootMotion = Vector3.zero;
         }
 
         public void StopClimb()
         {
+            _animatorController.Animator.applyRootMotion = true;
+            _animatorController.SetBool("Climb", false);
+            GetComponent<GroundIKController>().enabled = true;
+            GetComponent<ClimbIKController>().enabled = false;
             _rigidbody.useGravity = true;
-            _collision.enabled = true;
         }
 
         public void MoveInSlope(Vector3 rootTarget)
@@ -225,7 +234,7 @@ namespace Character
             }
         }
 
-        private void ApplyAnimationValues()
+        public void ApplyWalkingValues()
         {
             Vector2 input = _playerInput.InputMovement;
 
@@ -235,6 +244,14 @@ namespace Character
             _actualSpeed = _playerInput.InputMovement.sqrMagnitude;
 
             _animatorController.SetFloat("InputMagnitude", _actualSpeed);
+        }
+
+        public void ApplyClimbValues()
+        {
+            Vector2 input = _playerInput.InputMovement;
+            
+            _animatorController.SetFloat("Vertical", input.y);
+            _animatorController.SetFloat("Horizontal", input.x);
         }
 
         public ISensor GetGroundSensor() => _groundSensor;

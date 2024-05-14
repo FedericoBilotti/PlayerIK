@@ -6,7 +6,12 @@ namespace Character.States
         {
         }
 
-        public override void OnEnter() => playerMovement.StartClimb();
+        public override void OnEnter()
+        {
+            playerMovement.StartClimb();
+        }
+
+        public override void OnUpdate() => playerMovement.ApplyClimbValues();
 
         public override void OnFixedUpdate()
         {

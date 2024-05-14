@@ -7,5 +7,7 @@ namespace Character.States
         public IdleState(PlayerMovement playerMovement) : base(playerMovement)
         {
         }
+
+        public override void OnUpdate() => playerMovement.ApplyWalkingValues();
     }
 }

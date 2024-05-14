@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Character
 {
-    public class FootIK : MonoBehaviour
+    public class GroundIKController : MonoBehaviour
     {
         [SerializeField] private bool _enabled = true;
 
