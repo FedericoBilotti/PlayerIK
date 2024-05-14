@@ -19,7 +19,6 @@ namespace Character
 
         [Header("References")]
         [SerializeField] private AnimatorController _animatorController;
-        [SerializeField] private PlayerInput _playerInput;
 
         private Vector3 _rightFootPosition;
         private Vector3 _leftFootPosition;
@@ -34,7 +33,6 @@ namespace Character
         private void Awake()
         {
             _animatorController = GetComponent<AnimatorController>();
-            _playerInput = GetComponent<PlayerInput>();
         }
 
         private void FixedUpdate()
