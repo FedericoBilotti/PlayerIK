@@ -1,4 +1,3 @@
-using System;
 using Character.States;
 using StateMachine;
 using UnityEngine;
@@ -29,6 +28,7 @@ namespace Character
             var movement = new GroundState(_playerMovement);
             var slope = new SlopeState(_playerMovement);
             var stairs = new StairsState(_playerMovement);
+            var climb = new ClimbState(_playerMovement);
 
             // From Idle
             AddTransition(idle, movement, new FuncPredicate(() => _playerMovement.CanMove()));
@@ -37,6 +37,7 @@ namespace Character
             AddTransition(movement, idle, new FuncPredicate(() => !_playerMovement.CanMove()));
             AddTransition(movement, slope, new FuncPredicate(() => _playerMovement.GetSlopeSensor().OnCollision));
             AddTransition(movement, stairs, new FuncPredicate(() => _playerMovement.GetStairSensor().OnCollision));
+            AddTransition(movement, climb, new FuncPredicate(() => _playerMovement.GetClimbSensor().OnCollision));
             
             // From Slope
             AddTransition(slope, idle, new FuncPredicate(() => !_playerMovement.CanMove()));
@@ -45,6 +46,9 @@ namespace Character
             // From stairs
             AddTransition(stairs, idle, new FuncPredicate(() => !_playerMovement.CanMove()));
             AddTransition(stairs, movement, new FuncPredicate(() => !_playerMovement.GetStairSensor().OnCollision));
+            
+            // From Climb
+            AddTransition(climb, movement, new FuncPredicate(() => !_playerMovement.GetClimbSensor().OnCollision));
             
             _fsm.SetState(idle);            
         }
