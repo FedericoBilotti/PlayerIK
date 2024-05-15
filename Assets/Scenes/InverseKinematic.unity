@@ -9638,47 +9638,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48badad42dce4c6e95694e876d99ee25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _enabledGizmos: 0
   _playerHeight: 0.5
-  _speed: 20
-  _maxSpeed: 5
-  _jumpForce: 8
-  _jumpDelay: 0.2
-  _allowRotation: 0.3
-  _smoothnessRotation: 10
-  _groundRadius: 0.1
-  _groundCheckDistance: 0.47
-  _groundLayer:
-    serializedVersion: 2
-    m_Bits: 1856
-  _slopeRayLength: 1.4
-  _downSpeedOnSlope: 0.1
-  _slopeAngleLimit: 35
-  _slopeLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  _startRayClimb: 0.5
-  _climbRayLength: 0.5
-  _smoothnessClimb: 0.5
-  _climbSpeed: 1
-  _climbRotationSpeed: 10
-  _angleClimbRays: 75
-  _totalRaysClimb: 3
-  _offsetClimbRays: -25
-  _climbLayer:
-    serializedVersion: 2
-    m_Bits: 512
-  _stairHeight: 1
-  _moveSmoothness: 15
-  _stairLayer:
-    serializedVersion: 2
-    m_Bits: 1344
-  _totalRays: 4
-  _angleRays: 65
-  _offset: 336
-  _stairRayUpperLength: 0.23
-  _startRayUpper: 0.55
-  _stairRayLowerLength: 0.185
-  _startRayLower: 0.1
+  _groundMovement:
+    _speed: 20
+    _maxSpeed: 5
+    _allowRotation: 0.3
+    _smoothnessRotation: 10
+    _groundRadius: 0.1
+    _groundCheckDistance: 0.47
+    _groundLayer:
+      serializedVersion: 2
+      m_Bits: 1856
+  _jumpMovement:
+    _jumpForce: 2
+    _jumpDelay: 0.2
+  _slopeMovement:
+    _maxSpeed: 5
+    _slopeRayLength: 1.4
+    _downSpeedOnSlope: 0.1
+    _slopeAngleLimit: 35
+    _slopeLayer:
+      serializedVersion: 2
+      m_Bits: 256
+  _climbMovement:
+    _startRayClimb: 0.5
+    _climbRayLength: 0.5
+    _smoothnessClimb: 0.5
+    _climbSpeed: 1
+    _climbRotationSpeed: 10
+    _angleClimbRays: 73
+    _totalRaysClimb: 5
+    _offsetClimbRays: -25
+    _climbLayer:
+      serializedVersion: 2
+      m_Bits: 512
+  _stairsMovement:
+    _stairHeight: 1
+    _moveSmoothness: 15
+    _stairLayer:
+      serializedVersion: 2
+      m_Bits: 1344
+    _totalRays: 4
+    _angleRays: 65
+    _offset: 336
+    _stairRayUpperLength: 0.23
+    _startRayUpper: 0.55
+    _stairRayLowerLength: 0.185
+    _startRayLower: 0.1
 --- !u!136 &1225695607
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -9744,12 +9751,12 @@ MonoBehaviour:
   _feetToIkPositionSpeed: 58.5
   _footRotationWeight: 0.52
   _handRotationWeight: 0.6
-  _startPositionRaycast: -0.05
-  _distanceFromWallRaycast: 0.09
-  _raycastForwardDistance: 0.43
   _environmentLayer:
     serializedVersion: 2
     m_Bits: 512
+  _startPositionRaycast: 0
+  _distanceFromWallRaycast: 0.09
+  _raycastForwardDistance: 0.43
   _animatorController: {fileID: 1225695599}
 --- !u!1 &1317954387
 GameObject:

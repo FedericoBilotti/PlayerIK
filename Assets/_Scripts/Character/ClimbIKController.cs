@@ -10,11 +10,13 @@ namespace Character
         [SerializeField] private float _pelvisOffset;
         [SerializeField, Range(0f, 100f)] private float _pelvisUpDownSpeed = 58f;
         [SerializeField, Range(0f, 100f)] private float _feetToIkPositionSpeed = 0.5f;
-        [SerializeField] private float _footRotationWeight, _handRotationWeight;
+        [SerializeField, Range(0f, 1f)] private float _footRotationWeight, _handRotationWeight;
+        [SerializeField] private LayerMask _environmentLayer;
+        
+        [Header("Raycast")]
         [SerializeField] private float _startPositionRaycast;
         [SerializeField, Range(-2f, 2f)] private float _distanceFromWallRaycast = 1.14f;
         [SerializeField, Range(0f, 2f)] private float _raycastForwardDistance = 1.5f;
-        [SerializeField] private LayerMask _environmentLayer;
 
         [Header("References")]
         [SerializeField] private AnimatorController _animatorController;

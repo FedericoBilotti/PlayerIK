@@ -5,7 +5,6 @@ namespace Sensor
 {
     public class SlopeSensor : ISensor
     {
-        private readonly PlayerMovement _playerMovement;
         private readonly Transform _myTransform;
         private readonly float _playerHeight;
         private readonly float _rayLength;
@@ -17,9 +16,8 @@ namespace Sensor
         public RaycastHit Hit => _hit;
         private RaycastHit _hit;
 
-        public SlopeSensor(PlayerMovement playerMovement, Transform myTransform, float playerHeight, float rayLength, float slopeAngleLimit, LayerMask slopeLayer)
+        public SlopeSensor(Transform myTransform, float playerHeight, float rayLength, float slopeAngleLimit, LayerMask slopeLayer)
         {
-            _playerMovement = playerMovement;
             _myTransform = myTransform;
             _playerHeight = playerHeight;
             _rayLength = rayLength;

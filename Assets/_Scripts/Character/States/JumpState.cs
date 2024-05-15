@@ -13,24 +13,23 @@ namespace Character.States
 
         public override void OnEnter()
         {
-            Debug.Log("Enter jump state");
             animatorController.SetBool("InGround", false);
             _groundIKController.Enabled = false;
         }
 
         public override void OnFixedUpdate()
         {
-            Vector3 directionTarget = playerMovement.GetDirectionTarget(); 
+            Vector3 directionTarget = playerMovement.GetInputTargetDirection(); 
             Vector3 rootTarget = playerMovement.VelocityRootMotion() + directionTarget;
             
             playerMovement.Jump();
             playerMovement.Rotation(directionTarget);
             playerMovement.MoveInGround(rootTarget.normalized);
+            playerMovement.RestrictVelocityInGround();
         }
 
         public override void OnExit()
         {
-            Debug.Log("Exit jump state");
             _groundIKController.Enabled = true;
         }
     }

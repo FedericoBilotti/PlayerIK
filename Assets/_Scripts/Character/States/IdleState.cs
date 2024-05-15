@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace Character.States
 {
     public class IdleState : BasePlayerState

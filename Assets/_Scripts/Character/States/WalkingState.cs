@@ -2,9 +2,9 @@ using UnityEngine;
 
 namespace Character.States
 {
-    public class GroundState : BasePlayerState
+    public class WalkingState : BasePlayerState
     {
-        public GroundState(PlayerMovement playerMovement, AnimatorController animatorController) : base(playerMovement, animatorController)
+        public WalkingState(PlayerMovement playerMovement, AnimatorController animatorController) : base(playerMovement, animatorController)
         {
         }
 
@@ -12,11 +12,12 @@ namespace Character.States
 
         public override void OnFixedUpdate()
         {
-            Vector3 directionTarget = playerMovement.GetDirectionTarget();
+            Vector3 directionTarget = playerMovement.GetInputTargetDirection();
             Vector3 rootTarget = playerMovement.VelocityRootMotion() + directionTarget;
             
             playerMovement.Rotation(directionTarget);
             playerMovement.MoveInGround(rootTarget.normalized);
+            playerMovement.RestrictVelocityInGround();
         }
     }
 }

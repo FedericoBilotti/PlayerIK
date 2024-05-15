@@ -16,6 +16,7 @@ namespace Character.States
         public override void OnFixedUpdate()
         {
             playerMovement.ClimbWall();
+            playerMovement.RestrictVelocityInGround();
         }
 
         public override void OnExit() => playerMovement.ExitClimb();

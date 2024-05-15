@@ -12,11 +12,11 @@ namespace Character.States
 
         public override void OnFixedUpdate()
         {
-            Vector3 directionTarget = playerMovement.GetDirectionTarget(); 
+            Vector3 directionTarget = playerMovement.GetInputTargetDirection(); 
 
             playerMovement.Rotation(directionTarget);
-            
             playerMovement.MoveInStairs();
+            playerMovement.RestrictVelocityInGround();
         }
     }
 }

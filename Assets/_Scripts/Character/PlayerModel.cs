@@ -1,8 +1,6 @@
 using Character.States;
-using Sensor;
 using StateMachine;
 using UnityEngine;
-using Utilities;
 
 namespace Character
 {
@@ -14,13 +12,6 @@ namespace Character
         private PlayerInput _playerInput;
         private Rigidbody _rigidbody;
         private FiniteStateMachine _fsm;
-
-        private Timer _jumpTimer;
-        private ISensor _groundSensor;
-        private ISensor _slopeSensor;
-        private ISensor _stairSensor;
-        private ISensor _climbSensor;
-        private ISensor[] _sensors;
 
         private void Awake()
         {
@@ -44,7 +35,7 @@ namespace Character
             var groundIK = GetComponent<GroundIKController>();
 
             var idle = new IdleState(_playerMovement, _animatorController);
-            var movement = new GroundState(_playerMovement, _animatorController);
+            var movement = new WalkingState(_playerMovement, _animatorController);
             var slope = new SlopeState(_playerMovement, _animatorController);
             var stairs = new StairsState(_playerMovement, _animatorController);
             var jump = new JumpState(_playerMovement, _animatorController, groundIK);
