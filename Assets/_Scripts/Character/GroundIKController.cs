@@ -7,10 +7,10 @@ namespace Character
         [SerializeField] private bool _enabled = true;
 
         [SerializeField] private float _pelvisOffset;
-        [SerializeField, Range(0f, 2f)] private float _heightFromGroundRaycast = 1.14f;
-        [SerializeField, Range(0f, 2f)] private float _raycastDownDistance = 1.5f;
         [SerializeField, Range(0f, 100f)] private float _pelvisUpDownSpeed = 0.28f;
         [SerializeField, Range(0f, 100f)] private float _feetToIkPositionSpeed = 0.5f;
+        [SerializeField, Range(0f, 2f)] private float _heightFromGroundRaycast = 1.14f;
+        [SerializeField, Range(0f, 2f)] private float _raycastDownDistance = 1.5f;
         [SerializeField] private LayerMask _environmentLayer;
 
         [Header("Animator Curves Names")]
