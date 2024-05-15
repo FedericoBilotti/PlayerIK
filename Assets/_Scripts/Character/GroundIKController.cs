@@ -5,6 +5,7 @@ namespace Character
     public class GroundIKController : MonoBehaviour
     {
         [SerializeField] private bool _enabled = true;
+        [SerializeField] private bool _enabledGizmos = true;
 
         [SerializeField] private float _pelvisOffset;
         [SerializeField, Range(0f, 100f)] private float _pelvisUpDownSpeed = 0.28f;
@@ -144,7 +145,7 @@ namespace Character
         
         private void OnDrawGizmos()
         {
-            if (!_enabled) return;
+            if (!_enabledGizmos) return;
             
             Gizmos.color = Color.yellow;
 

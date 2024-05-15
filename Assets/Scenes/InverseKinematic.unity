@@ -297,7 +297,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 127280987}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.1499977, y: 0.14272913, z: -0.021888737, w: 0.97808486}
+  m_LocalRotation: {x: 0.14999749, y: 0.14273904, z: -0.021890262, w: 0.97808343}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -423,7 +423,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.1499977, y: 0.14272913, z: -0.021888737, w: 0.97808486}
+  m_LocalRotation: {x: 0.14999749, y: 0.14273904, z: -0.021890262, w: 0.97808343}
   m_LocalPosition: {x: -0.88140273, y: 2.1257877, z: 15.496593}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1018,7 +1018,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 620574003}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.1499977, y: 0.14272913, z: -0.021888737, w: 0.97808486}
+  m_LocalRotation: {x: 0.14999749, y: 0.14273904, z: -0.021890262, w: 0.97808343}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -9587,6 +9587,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _enabled: 1
+  _enabledGizmos: 1
   _pelvisOffset: 0
   _pelvisUpDownSpeed: 68
   _feetToIkPositionSpeed: 58.5
@@ -9734,24 +9735,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b2ebf360dad8d94c8006ba1dd2ea523, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _enabled: 0
-  _pelvisOffset: 0
+  _enabled: 1
+  _enabledGizmos: 1
+  _pelvisOffset: -0.33
   _pelvisUpDownSpeed: 58
   _feetToIkPositionSpeed: 58.5
-  _distanceHandsWall: 0
-  _distanceFootsWall: 0.02
-  _distanceFromGroundRaycast: -0.18
-  _raycastForwardDistance: 1.34
+  _distanceHandsWall: -0.05
+  _distanceFootsWall: -0.16
+  _footRotationWeight: 0.52
+  _handRotationWeight: 0.6
+  _startPositionRaycast: -0.05
+  _distanceFromWallRaycast: 0.09
+  _raycastForwardDistance: 0.43
   _environmentLayer:
     serializedVersion: 2
     m_Bits: 512
   _animatorController: {fileID: 1225695599}
-  _footRotationWeight: 0.52
-  _handRotationWeight: 0.6
-  _rightFootName: RightFootIK
-  _leftFootName: LeftFootIK
-  _rightHandName: RightHandIK
-  _leftHandName: LeftHandIK
 --- !u!1 &1317954387
 GameObject:
   m_ObjectHideFlags: 0
@@ -14996,7 +14995,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2039933050}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.14999768, y: 0.14272913, z: -0.021888735, w: 0.97808486}
+  m_LocalRotation: {x: 0.14999749, y: 0.14273904, z: -0.021890262, w: 0.97808343}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
