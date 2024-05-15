@@ -4,7 +4,7 @@ namespace Character.States
 {
     public class SlopeState : BasePlayerState
     {
-        public SlopeState(PlayerMovement playerMovement) : base(playerMovement)
+        public SlopeState(PlayerMovement playerMovement, AnimatorController animatorController) : base(playerMovement, animatorController)
         {
         }
 

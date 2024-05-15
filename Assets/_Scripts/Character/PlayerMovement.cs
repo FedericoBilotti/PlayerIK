@@ -4,7 +4,6 @@ using Utilities;
 
 namespace Character
 {
-    [RequireComponent(typeof(Rigidbody))]
     public class PlayerMovement : MonoBehaviour
     {
         [Header("Settings")]
@@ -14,6 +13,10 @@ namespace Character
         [Header("Velocity")]
         [SerializeField] private float _speed = 10f;
         [SerializeField] private float _maxSpeed = 10f;
+        
+        [Header("Jump")]
+        [SerializeField] private float _jumpForce = 10f;
+        [SerializeField] private float _jumpDelay = .4f;
 
         [Header("Rotations")]
         [SerializeField, Range(0f, 1f)] private float _allowRotation = 0.3f;
@@ -24,7 +27,7 @@ namespace Character
         [SerializeField, Range(0.01f, 1f)] private float _groundRadius = 0.6f;
         [SerializeField, Range(0.01f, 2f)] private float _groundCheckDistance = 0.6f;
         [SerializeField] private LayerMask _groundLayer;
-
+        
         [Header("Slope Check")]
         [SerializeField] private float _slopeRayLength = 1.4f;
         [SerializeField] private float _downSpeedOnSlope = 5f;
@@ -56,37 +59,40 @@ namespace Character
         [SerializeField, Range(0f, 1f)] private float _stairRayLowerLength = 0.2f;
         [SerializeField, Range(-5f, 5f)] private float _startRayLower;
 
+        private Timer _jumpTimer;
         private ISensor _groundSensor;
         private ISensor _slopeSensor;
         private ISensor _stairSensor;
         private ISensor _climbSensor;
         private ISensor[] _sensors;
-
+        
+        private Rigidbody _rigidbody;
         private AnimatorController _animatorController;
         private PlayerInput _playerInput;
         private Transform _cameraTransform;
         private Transform _myTransform;
-        private Rigidbody _rigidbody;
 
         private Vector3 _velocityRootMotion;
 
-        private void Awake()
+        public void Initialize(AnimatorController animatorController, PlayerInput playerInput, Rigidbody rigidbody)
         {
-            _animatorController = GetComponent<AnimatorController>();
-            _playerInput = GetComponent<PlayerInput>();
-
-            _rigidbody = GetComponent<Rigidbody>();
+            _playerInput = playerInput;
+            _animatorController = animatorController;
+            
+            _rigidbody = rigidbody;
             _rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
             _rigidbody.drag = 5;
-
+            
             _cameraTransform = Camera.main.transform;
             _myTransform = transform;
+            
+            CreateSensors();
+            CreateTimer();
         }
-
-        private void Start() => CreateSensors();
 
         private void Update()
         {
+            UpdateTimer();
             _rigidbody.drag = _groundSensor.OnCollision ? 5 : 0;
         }
 
@@ -107,7 +113,7 @@ namespace Character
             return positionTarget;
         }
 
-        public void StartClimb()
+        public void EnterClimb()
         {
             _animatorController.Animator.applyRootMotion = false;
             _animatorController.SetBool("Climb", true);
@@ -138,13 +144,24 @@ namespace Character
             _velocityRootMotion = Vector3.zero;
         }
 
-        public void StopClimb()
+        public void ExitClimb()
         {
             _animatorController.Animator.applyRootMotion = true;
             _animatorController.SetBool("Climb", false);
             GetComponent<GroundIKController>().Enabled = true; // Pedirlo en el Awake
             GetComponent<ClimbIKController>().Enabled = false; // Pedirlo en el Awake
             _rigidbody.useGravity = true;
+        }
+
+        public void Jump()
+        {
+            _rigidbody.velocity = Vector3.up * (_jumpForce * 100f * Time.fixedDeltaTime);
+        }
+
+        public void JumpOutClimb()
+        {
+            Debug.Log("OutClimb");
+            _rigidbody.velocity = -transform.TransformDirection(Vector3.forward) * (_jumpForce * 100f * Time.fixedDeltaTime);
         }
 
         public void MoveInSlope(Vector3 rootTarget)
@@ -210,6 +227,9 @@ namespace Character
             _rigidbody.velocity = new Vector3(newVel.x, _rigidbody.velocity.y, newVel.z);
         }
 
+        private void CreateTimer() => _jumpTimer = new CountdownTimer(_jumpDelay);
+        private void UpdateTimer() => _jumpTimer.Tick(Time.deltaTime);
+
         private void CreateSensors()
         {
             _sensors = new[]
@@ -254,6 +274,8 @@ namespace Character
         public ISensor GetStairSensor() => _stairSensor;
         public ISensor GetSlopeSensor() => _slopeSensor;
         public ISensor GetClimbSensor() => _climbSensor;
+
+        public Timer GetJumpTimer() => _jumpTimer;
         
         public bool CanMove() => _actualSpeed > _allowRotation;
         public Vector3 VelocityRootMotion() => _velocityRootMotion;

@@ -6,12 +6,14 @@ namespace Character.States
     public class BasePlayerState : IState
     {
         protected readonly PlayerMovement playerMovement;
+        protected readonly AnimatorController animatorController;
 
-        public BasePlayerState(PlayerMovement playerMovement)
+        public BasePlayerState(PlayerMovement playerMovement, AnimatorController animatorController)
         {
             this.playerMovement = playerMovement;
+            this.animatorController = animatorController;
         }
-        
+
         public virtual void OnEnter()
         {
         }

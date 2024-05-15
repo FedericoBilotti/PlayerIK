@@ -4,7 +4,7 @@ namespace Character.States
 {
     public class IdleState : BasePlayerState
     {
-        public IdleState(PlayerMovement playerMovement) : base(playerMovement)
+        public IdleState(PlayerMovement playerMovement, AnimatorController animatorController) : base(playerMovement, animatorController)
         {
         }
 

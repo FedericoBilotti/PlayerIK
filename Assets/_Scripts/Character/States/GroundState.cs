@@ -4,7 +4,7 @@ namespace Character.States
 {
     public class GroundState : BasePlayerState
     {
-        public GroundState(PlayerMovement playerMovement) : base(playerMovement)
+        public GroundState(PlayerMovement playerMovement, AnimatorController animatorController) : base(playerMovement, animatorController)
         {
         }
 
@@ -12,12 +12,10 @@ namespace Character.States
 
         public override void OnFixedUpdate()
         {
-            Vector3 directionTarget = playerMovement.GetDirectionTarget(); 
-
-            playerMovement.Rotation(directionTarget);
-
+            Vector3 directionTarget = playerMovement.GetDirectionTarget();
             Vector3 rootTarget = playerMovement.VelocityRootMotion() + directionTarget;
             
+            playerMovement.Rotation(directionTarget);
             playerMovement.MoveInGround(rootTarget.normalized);
         }
     }

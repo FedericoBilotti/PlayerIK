@@ -4,7 +4,7 @@ namespace Character.States
 {
     public class StairsState : BasePlayerState
     {
-        public StairsState(PlayerMovement playerMovement) : base(playerMovement)
+        public StairsState(PlayerMovement playerMovement, AnimatorController animatorController) : base(playerMovement, animatorController)
         {
         }
 

@@ -2,13 +2,13 @@ namespace Character.States
 {
     public class ClimbState : BasePlayerState
     {
-        public ClimbState(PlayerMovement playerMovement) : base(playerMovement)
+        public ClimbState(PlayerMovement playerMovement, AnimatorController animatorController) : base(playerMovement, animatorController)
         {
         }
 
         public override void OnEnter()
         {
-            playerMovement.StartClimb();
+            playerMovement.EnterClimb();
         }
 
         public override void OnUpdate() => playerMovement.ApplyClimbValues();
@@ -18,6 +18,6 @@ namespace Character.States
             playerMovement.ClimbWall();
         }
 
-        public override void OnExit() => playerMovement.StopClimb();
+        public override void OnExit() => playerMovement.ExitClimb();
     }
 }
