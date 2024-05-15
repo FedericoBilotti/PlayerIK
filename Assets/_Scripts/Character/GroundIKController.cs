@@ -134,6 +134,12 @@ namespace Character
             _animatorController.Animator.SetIKRotationWeight(AvatarIKGoal.LeftFoot, _animatorController.Animator.GetFloat(_leftFootName));
         }
 
+        public bool Enabled
+        {
+            get => _enabled;
+            set => _enabled = value;
+        }
+
         #region Gizmos
         
         private void OnDrawGizmos()

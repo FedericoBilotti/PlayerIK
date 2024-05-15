@@ -1,10 +1,6 @@
-using System.Numerics;
 using Sensor;
 using UnityEngine;
 using Utilities;
-using Quaternion = UnityEngine.Quaternion;
-using Vector2 = UnityEngine.Vector2;
-using Vector3 = UnityEngine.Vector3;
 
 namespace Character
 {
@@ -115,8 +111,8 @@ namespace Character
         {
             _animatorController.Animator.applyRootMotion = false;
             _animatorController.SetBool("Climb", true);
-            GetComponent<GroundIKController>().enabled = false;
-            GetComponent<ClimbIKController>().enabled = true;
+            GetComponent<GroundIKController>().Enabled = false; // Pedirlo en el Awake
+            GetComponent<ClimbIKController>().Enabled = true;   // Pedirlo en el Awake
             _rigidbody.useGravity = false;
         }
 
@@ -146,8 +142,8 @@ namespace Character
         {
             _animatorController.Animator.applyRootMotion = true;
             _animatorController.SetBool("Climb", false);
-            GetComponent<GroundIKController>().enabled = true;
-            GetComponent<ClimbIKController>().enabled = false;
+            GetComponent<GroundIKController>().Enabled = true; // Pedirlo en el Awake
+            GetComponent<ClimbIKController>().Enabled = false; // Pedirlo en el Awake
             _rigidbody.useGravity = true;
         }
 
